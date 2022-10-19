@@ -23,12 +23,18 @@ export default abstract class GameProgressLocalStorage {
   }
 
   static writeState = (state: PuzzleState) => {
+    const tiles: LocalStorageState['tiles'] = []
+
+    state.tiles.forEach((tile) => {
+      tiles.push(tile.toObject())
+    })
+
     const localStorageState: LocalStorageState = {
-      frameSize: state.frameSize,
-      moves: state.moves,
-      time: state.time,
+      tileMatrix: state.tileMatrix,
+      tiles: tiles,
       paused: state.paused,
-      tiles: state.tiles,
+      time: state.time,
+      moves: state.moves
     }
 
     const encoded = JSON.stringify(localStorageState)

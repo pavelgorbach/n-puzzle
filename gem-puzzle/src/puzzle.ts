@@ -1,41 +1,53 @@
-import { PuzzleState, LocalStorageState } from './types'
+import * as I from './types'
+import TileComponent from './tile'
 
 type Options = {
   canvasSize: { width: number, height: number }
-  frameSize: '3x3' | '4x4' | '5x5' | '6x6' | '7x7' | '8x8'
   canvasOutlineStyle: string
 }
 
 const DEFAULT_OPTIONS: Options = {
   canvasSize: { width: 640, height: 640 },
-  frameSize: '4x4',
   canvasOutlineStyle: '1px solid gray'
 }
 
 export default class Puzzle {
-  private state: PuzzleState
+  private state: I.PuzzleState
 
   private rootEl: HTMLElement
   private canvasEl: HTMLCanvasElement
+  private ctx: CanvasRenderingContext2D
   private options: Options
   
-  private onSquareDrag: null | ((e: MouseEvent) => void) = null
+  private onTileDrag: null | ((e: MouseEvent) => void) = null
 
   constructor(
-    rootElement: HTMLElement,
-    initialState: LocalStorageState = { moves: 0, time: 0, paused: true, tiles: [], frameSize: '4x4' }
+    rootEl: HTMLElement,
+    initialState: I.LocalStorageState = { moves: 0, time: 0, paused: true, tiles: [], tileMatrix: 4 },
+    options: Options = DEFAULT_OPTIONS
   ) {
+    this.options = options
 
-    this.state = initialState
+    const tiles: Map<I.TileId, TileComponent> = new Map()
 
-    const canvasElement: HTMLCanvasElement = document.createElement('canvas')
+    initialState.tiles.forEach((tile) => {
+      tiles.set(
+        tile.id,
+        new TileComponent(tile)
+      )
+    })
 
-    if(canvasElement === null) {
-      throw new Error('Cannot create canvas element')
-    }
+    this.state = { ...initialState, tiles }
 
-    const ctx = canvasElement.getContext('2d')
-    rootElement.appendChild(canvasElement)
+    this.rootEl = rootEl
+    this.canvasEl = document.createElement('canvas')
+
+    const canvasContext = this.canvasEl.getContext('2d')
+    if(canvasContext === null) throw new Error('Cannot create canvas element')
+
+    this.ctx = canvasContext
+
+    this.mount()
   }
 
   start() {
@@ -57,8 +69,32 @@ export default class Puzzle {
   onGameFinished() {
 
   }
+  
+  private addEventListeners() {
 
-  draw() {
-    
+  }
+
+  private mount() {
+    this.canvasEl.setAttribute('width', this.options.canvasSize.width.toString())
+    this.canvasEl.setAttribute('height', this.options.canvasSize.height.toString())
+    this.canvasEl.style.outline = this.options.canvasOutlineStyle
+
+    this.canvasEl.oncontextmenu = () => false
+
+    this.rootEl.append(this.canvasEl)
+
+    this.render()
+    this.addEventListeners()
+  }
+
+  private clear() {
+    this.ctx.clearRect(0, 0, this.options.canvasSize.width, this.options.canvasSize.height)
+  }
+
+  private render() {
+    requestAnimationFrame(() => {
+      this.clear()
+      console.log('REQUEST ANIMATION FRAME')
+    })
   }
 }

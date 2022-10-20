@@ -8,18 +8,40 @@ export default class TileComponent {
   constructor(tile: I.TileDTO) {
     this.id = tile.id
     this.position = tile.position
-    this.size = tile.size
   }
 
   toObject = (): I.TileDTO => {
     return {
       id: this.id,
-      position: this.position,
-      size: this.size
+      position: this.position
     }
   }
 
-  render() {
-    
+  draw(
+    ctx: CanvasRenderingContext2D,
+    options: {
+      tileBorderWidth: number,
+      initialStrokeColor: string
+      canvasSize: { width: number, height: number }
+      tileMatrix: number
+    }
+  ) {
+    ctx.beginPath()
+
+    ctx.lineWidth = options.tileBorderWidth
+    ctx.strokeStyle = options.initialStrokeColor
+
+    const min = Math.min(options.canvasSize.width, options.canvasSize.height)
+    const size = min / options.tileMatrix
+    const delta = options.canvasSize.width / 2 - (size * options.tileMatrix / 2)
+
+    ctx.rect(
+      this.position.x * size + delta, 
+      this.position.y * size + options.canvasSize.height / 2 - (size * options.tileMatrix / 2), 
+      size,
+      size 
+    )
+
+    ctx.stroke() 
   }
 }

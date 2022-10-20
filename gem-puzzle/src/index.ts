@@ -1,5 +1,9 @@
+import 'normalize.css'
+
 import GameProgressLocalStorage from './localStorage' 
 import Puzzle from './puzzle'
+
+import './style.css'
 
 const rootElement = document.getElementById('root')
 

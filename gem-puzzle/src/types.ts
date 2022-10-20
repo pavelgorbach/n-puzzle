@@ -12,7 +12,14 @@ export type Position = {
 export type TileDTO = {
   id: TileId
   position: Position
-  size: number
+}
+
+export type CanvasDims = {
+  cssWidth: number
+  cssHeight: number
+  pxWidth: number
+  pxHeight: number
+  dpr: number
 }
 
 export type PuzzleState = {

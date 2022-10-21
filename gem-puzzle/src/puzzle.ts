@@ -1,70 +1,87 @@
 import * as I from './types'
-
-import { canvasDimensions, generateTiles } from './utils'
+import * as utils from './utils'
 
 import GameProgressLocalStorage from './localStorage'
 import TileComponent from './tile'
 
 type Options = Readonly<{
+  canvasStylePosition: string
   canvasStyleWidth: string 
   canvasStyleHeight: string 
   tileBorderWidth: number
   defaultTileStrokeColor: string
+  tileTextAlign: CanvasTextAlign 
+  tileTextBaseLine: CanvasTextBaseline 
 }>
 
 export const DEFAULT_OPTIONS: Options = {
+  canvasStylePosition: 'relative',
   canvasStyleWidth: '100%',
   canvasStyleHeight: '100%',
   tileBorderWidth: 1,
-  defaultTileStrokeColor: 'black'
+  defaultTileStrokeColor: 'black',
+  tileTextAlign: "center",
+  tileTextBaseLine: "middle" 
 }
 export default class Puzzle {
   private options: Options
   private state: I.PuzzleState
 
-  private rootEl: HTMLElement
   private canvasEl: HTMLCanvasElement
   private ctx: CanvasRenderingContext2D
   private canvasDims: I.CanvasDims
-  
-  private onTileDrag: null | ((e: MouseEvent) => void) = null
 
   constructor(
     rootEl: HTMLElement,
-    initialState: I.LocalStorageState = { moves: 0, time: 0, paused: true, tiles: [], tileMatrix: 4 },
+    initialState: I.LocalStorageState = {
+      moves: 0,
+      time: 0,
+      paused: true,
+      tiles: [],
+      tileMatrix: 3, 
+      unoccupiedPosition: { x: 2, y: 2 }
+    },
     options: Options = DEFAULT_OPTIONS,
   ) {
     this.options = options
 
     this.canvasEl = document.createElement('canvas')
-    this.canvasEl.style.position = 'relative'
+    this.canvasEl.style.position = options.canvasStylePosition 
     this.canvasEl.style.width = options.canvasStyleWidth
     this.canvasEl.style.height = options.canvasStyleHeight
 
     rootEl.append(this.canvasEl)
 
-    this.canvasDims = canvasDimensions(this.canvasEl)
+    this.canvasDims = utils.getCanvasDimensions(this.canvasEl)
     this.canvasEl.width = this.canvasDims.pxWidth
     this.canvasEl.height = this.canvasDims.pxHeight
 
     const canvasContext = this.canvasEl.getContext('2d')
-    if(canvasContext === null) throw new Error('Cannot create canvas element')
+
+    if(canvasContext === null) throw new Error('Cannot get canvas context')
 
     this.ctx = canvasContext
     this.ctx.scale(this.canvasDims.dpr, this.canvasDims.dpr)
 
     const tiles: Map<I.TileId, TileComponent> = new Map()
 
-    if(initialState.tiles.length > 0) {
-      initialState.tiles.forEach((tile) => {
-        tiles.set(tile.id, new TileComponent(tile))
-      })
-    } else { 
-      const initialTiles = generateTiles(initialState.tileMatrix)
-      initialTiles.forEach((tile) => {
-        tiles.set(tile.id, new TileComponent(tile))
-      })
+    let initialTiles = initialState.tiles
+
+    if(initialTiles.length === 0) {
+      initialTiles = utils.generateTiles(initialState.tileMatrix)
     }
+
+    initialTiles.forEach((tile) => {
+      tiles.set(
+        tile.id,
+        new TileComponent(tile, {
+          borderWidth: options.tileBorderWidth,
+          strokeColor: options.defaultTileStrokeColor,
+          textAlign: options.tileTextAlign,
+          textBaseLine: options.tileTextBaseLine
+        })
+      )
+    })
 
     this.state = { ...initialState, tiles }
 
@@ -77,6 +94,41 @@ export default class Puzzle {
 
   private addEventListeners() {
     new ResizeObserver(() => this.render()).observe(this.canvasEl)
+
+    this.canvasEl.addEventListener('mousedown', (e) => {
+      const cursorPosition = { x: e.offsetX, y: e.offsetY }
+      const tileMatch = this.findTileByPosition(cursorPosition)
+
+      if(tileMatch === null) return
+
+      const tileMovable = utils.ifTileNextToUnoccupied(tileMatch.positionOnBoard, this.state.unoccupiedPosition)
+
+      if(tileMovable) {
+        const newPosition = this.state.unoccupiedPosition
+        this.state.unoccupiedPosition = tileMatch.positionOnBoard  
+        tileMatch.positionOnBoard = newPosition 
+        this.render()
+      }
+    })
+  }
+
+  private findTileByPosition = (p: { x: number, y: number }): TileComponent | null => {
+    const tiles = [...this.state.tiles.values()]
+
+    for (let i = tiles.length - 1; i >= 0; i--) {
+      const tile = tiles[i]
+
+      const isClickWithinTileArea = utils.getIsPointWithinTileArea({
+        point: { ...p },
+        tile: { x: tile.position.x, y: tile.position.y, size: tile.size },
+      })
+
+      if (isClickWithinTileArea === false) continue
+
+      return tile
+    }
+
+    return null
   }
 
   private mount() {
@@ -87,7 +139,7 @@ export default class Puzzle {
   }
 
   private clear() {
-    this.canvasDims = canvasDimensions(this.canvasEl)
+    this.canvasDims = utils.getCanvasDimensions(this.canvasEl)
     this.canvasEl.width = this.canvasDims.pxWidth
     this.canvasEl.height = this.canvasDims.pxHeight
 
@@ -103,8 +155,6 @@ export default class Puzzle {
         tile.draw(
           this.ctx,
           {
-            tileBorderWidth: this.options.tileBorderWidth,
-            initialStrokeColor: this.options.defaultTileStrokeColor,
             canvasSize: { width: this.canvasDims.cssWidth, height: this.canvasDims.cssHeight },
             tileMatrix: this.state.tileMatrix
           }

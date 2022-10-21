@@ -11,7 +11,7 @@ export type Position = {
 
 export type TileDTO = {
   id: TileId
-  position: Position
+  positionOnBoard: Position
 }
 
 export type CanvasDims = {
@@ -28,6 +28,7 @@ export type PuzzleState = {
   time: number
   paused: boolean
   tiles: Map<TileId, TileComponent>
+  unoccupiedPosition: Position
 }
 
 export type LocalStorageState = {
@@ -36,4 +37,5 @@ export type LocalStorageState = {
   time: number
   paused: boolean
   tiles: TileDTO[]
+  unoccupiedPosition: Position
 }

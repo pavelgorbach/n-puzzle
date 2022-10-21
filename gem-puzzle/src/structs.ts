@@ -6,7 +6,7 @@ const tileId = (): Struct<I.TileId, null> => string() as any
 export const Tile: Struct<I.TileDTO> = object({
   id: tileId(),
   size: number(),
-  position: object({
+  positionOnBoard: object({
     x: number(),
     y: number(),
   })
@@ -18,4 +18,5 @@ export const LocalStorageState: Struct<I.LocalStorageState> = object({
   time: number(),
   paused: boolean(),
   tiles: array(Tile),
+  unoccupiedPosition: object({ x: number(), y: number() })
 })

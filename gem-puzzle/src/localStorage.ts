@@ -34,7 +34,8 @@ export default abstract class GameProgressLocalStorage {
       tiles: tiles,
       paused: state.paused,
       time: state.time,
-      moves: state.moves
+      moves: state.moves,
+      unoccupiedPosition: state.unoccupiedPosition
     }
 
     const encoded = JSON.stringify(localStorageState)

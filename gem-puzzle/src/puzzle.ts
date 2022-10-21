@@ -24,7 +24,6 @@ export const DEFAULT_OPTIONS: Options = {
   tileTextBaseLine: "middle" 
 }
 export default class Puzzle {
-  private options: Options
   private state: I.PuzzleState
 
   private canvasEl: HTMLCanvasElement
@@ -38,13 +37,11 @@ export default class Puzzle {
       time: 0,
       paused: true,
       tiles: [],
-      tileMatrix: 3, 
-      unoccupiedPosition: { x: 2, y: 2 }
+      tileMatrix: 4, 
+      unoccupiedPosition: { x: 3, y: 3 }
     },
     options: Options = DEFAULT_OPTIONS,
   ) {
-    this.options = options
-
     this.canvasEl = document.createElement('canvas')
     this.canvasEl.style.position = options.canvasStylePosition 
     this.canvasEl.style.width = options.canvasStyleWidth
@@ -68,7 +65,8 @@ export default class Puzzle {
     let initialTiles = initialState.tiles
 
     if(initialTiles.length === 0) {
-      initialTiles = utils.generateTiles(initialState.tileMatrix)
+      const generatedTiles = utils.generateTiles(initialState.tileMatrix)
+      initialTiles = utils.shuffleTiles(generatedTiles)
     }
 
     initialTiles.forEach((tile) => {
@@ -88,6 +86,17 @@ export default class Puzzle {
     this.mount()
   }
 
+  stopAndShuffle() {
+    const arr = [...this.state.tiles.values()]
+    const shuffledTiels = utils.shuffleTiles(arr)
+
+    shuffledTiels.forEach((tile) => {
+      this.state.tiles.set(tile.id, tile)
+    })
+
+    this.render()
+  }
+
   save() {
     GameProgressLocalStorage.writeState(this.state)
   }
@@ -101,12 +110,13 @@ export default class Puzzle {
 
       if(tileMatch === null) return
 
-      const tileMovable = utils.ifTileNextToUnoccupied(tileMatch.positionOnBoard, this.state.unoccupiedPosition)
+      const tileMovable = utils.isTileNextToUnoccupied(tileMatch.positionOnBoard, this.state.unoccupiedPosition)
 
       if(tileMovable) {
-        const newPosition = this.state.unoccupiedPosition
+        const newPositionOnBoard = this.state.unoccupiedPosition
         this.state.unoccupiedPosition = tileMatch.positionOnBoard  
-        tileMatch.positionOnBoard = newPosition 
+        tileMatch.positionOnBoard = newPositionOnBoard
+        
         this.render()
       }
     })
@@ -140,6 +150,7 @@ export default class Puzzle {
 
   private clear() {
     this.canvasDims = utils.getCanvasDimensions(this.canvasEl)
+
     this.canvasEl.width = this.canvasDims.pxWidth
     this.canvasEl.height = this.canvasDims.pxHeight
 
@@ -150,15 +161,17 @@ export default class Puzzle {
   private render() {
     requestAnimationFrame(() => {
       this.clear()  
-
+      
       this.state.tiles.forEach((tile) => {
-        tile.draw(
-          this.ctx,
-          {
-            canvasSize: { width: this.canvasDims.cssWidth, height: this.canvasDims.cssHeight },
-            tileMatrix: this.state.tileMatrix
-          }
-        )
+        const tileDims = utils.getTileDimensions({
+          canvasSize: { width: this.canvasDims.cssWidth, height: this.canvasDims.cssHeight },
+          tileMatrix: this.state.tileMatrix,
+          tilePositionOnBoard: tile.positionOnBoard
+        })
+
+        tile.updateDimensions(tileDims)
+
+        tile.draw(this.ctx)
       })
     })
   }

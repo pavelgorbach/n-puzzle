@@ -10,6 +10,19 @@ export function getCanvasDimensions(canvas: HTMLCanvasElement | HTMLElement) {
   return { dpr, cssWidth, cssHeight, pxWidth, pxHeight }
 }
 
+export function getTileDimensions(p: {
+  canvasSize: { width: number, height: number },
+  tilePositionOnBoard: { x: number, y: number},
+  tileMatrix: I.TileMatrix
+}) {
+    const min = Math.min(p.canvasSize.width, p.canvasSize.height)
+    const tileSize = min / p.tileMatrix
+    const boardSize = tileSize * p.tileMatrix
+    const x = (p.tilePositionOnBoard.x * tileSize) + ((p.canvasSize.width - boardSize) / 2)
+    const y = (p.tilePositionOnBoard.y * tileSize) + ((p.canvasSize.height - boardSize) / 2)
+    return { x, y, size: tileSize }
+}
+
 export function getIsPointWithinTileArea(p: {
   point: { x: number; y: number }
   tile: { x: number; y: number; size: number }
@@ -20,7 +33,7 @@ export function getIsPointWithinTileArea(p: {
   return x && y
 }
 
-export function ifTileNextToUnoccupied(tile: I.Position, unoccupied: I.Position) {
+export function isTileNextToUnoccupied(tile: I.Position, unoccupied: I.Position) {
   return (
     tile.x === unoccupied.x && tile.y + 1 === unoccupied.y ||
     tile.x === unoccupied.x && tile.y - 1 === unoccupied.y ||
@@ -32,7 +45,6 @@ export function ifTileNextToUnoccupied(tile: I.Position, unoccupied: I.Position)
 export function generateTiles(matrix: number): I.TileDTO[] {
   const length = Math.pow(matrix, 2) - 1
   const ids = Array.from({ length }, (_, idx) => idx.toString())
-  const shuffledIds = shuffle(ids) 
   
   const tiles: I.TileDTO[] = []
 
@@ -40,9 +52,9 @@ export function generateTiles(matrix: number): I.TileDTO[] {
 
   for(let i = 0; i < matrix; i++) {
     for(let j = 0; j < matrix; j++) {
-      if(shuffledIds[idx]) {
+      if(ids[idx]) {
         tiles.push({
-          id: shuffledIds[idx] as I.TileId,
+          id: ids[idx] as I.TileId,
           positionOnBoard: { x: j, y: i },
         })
       }
@@ -53,8 +65,9 @@ export function generateTiles(matrix: number): I.TileDTO[] {
   return tiles
 }
 
-export function shuffle(data: unknown[]) {
+export function shuffleTiles<T>(data: T[]) {
   const arr = [...data]
+
   for (let i = arr.length - 1; i > 0; i--) {
     let j = Math.floor(Math.random() * (i + 1)); // random index from 0 to i
     [arr[i], arr[j]] = [arr[j], arr[i]];

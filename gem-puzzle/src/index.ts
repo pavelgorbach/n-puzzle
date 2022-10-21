@@ -5,11 +5,10 @@ import Puzzle from './puzzle'
 
 import './style.css'
 
-const rootElement = document.getElementById('root')
+const rootElement = document.createElement('div')
+rootElement.id = 'root'
 
-if(rootElement === null) {
-  throw new Error('cannot find rootElement')
-}
+document.body.append(rootElement)
 
 const initialState = GameProgressLocalStorage.readState() || undefined 
 

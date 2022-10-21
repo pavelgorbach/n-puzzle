@@ -38,12 +38,18 @@ export default class TileComponent {
   draw(ctx: CanvasRenderingContext2D) {
     ctx.beginPath()
     ctx.lineWidth = this.borderWidth
-    ctx.strokeStyle = this.strokeColor
     ctx.textAlign = this.textAlign
     ctx.textBaseline = this.textBaseLine 
     ctx.font = `${this.size / 2}px Arial`
-    ctx.rect(this.position.x, this.position.y, this.size, this.size)
+
+    ctx.fillStyle = 'white'
+    ctx.fillRect(this.position.x, this.position.y, this.size, this.size)
+
+    ctx.fillStyle = 'black'
     ctx.fillText(`${Number(this.id) + 1}`, this.position.x + (this.size / 2), this.position.y + (this.size / 2))
-    ctx.stroke() 
+
+    ctx.strokeStyle = this.strokeColor
+    ctx.strokeRect(this.position.x, this.position.y, this.size, this.size)
+    ctx.closePath()
   }
 }

@@ -10,17 +10,16 @@ export function getCanvasDimensions(canvas: HTMLCanvasElement | HTMLElement) {
   return { dpr, cssWidth, cssHeight, pxWidth, pxHeight }
 }
 
-export function getTileDimensions(p: {
+export function getBoardDimensions(p: {
   canvasSize: { width: number, height: number },
-  tilePositionOnBoard: { x: number, y: number},
   tileMatrix: I.TileMatrix
 }) {
-    const min = Math.min(p.canvasSize.width, p.canvasSize.height)
-    const tileSize = min / p.tileMatrix
-    const boardSize = tileSize * p.tileMatrix
-    const x = (p.tilePositionOnBoard.x * tileSize) + ((p.canvasSize.width - boardSize) / 2)
-    const y = (p.tilePositionOnBoard.y * tileSize) + ((p.canvasSize.height - boardSize) / 2)
-    return { x, y, size: tileSize }
+  const min = Math.min(p.canvasSize.width, p.canvasSize.height)
+  const tileSize = min / p.tileMatrix - 40
+  const boardSize = tileSize * p.tileMatrix
+  const x = (p.canvasSize.width - boardSize) / 2
+  const y = (p.canvasSize.height - boardSize) / 2
+  return { x, y, size: boardSize}
 }
 
 export function getIsPointWithinTileArea(p: {

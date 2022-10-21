@@ -5,9 +5,6 @@ import GameProgressLocalStorage from './localStorage'
 import TileComponent from './tile'
 
 type Options = Readonly<{
-  canvasStylePosition: string
-  canvasStyleWidth: string 
-  canvasStyleHeight: string 
   tileBorderWidth: number
   defaultTileStrokeColor: string
   tileTextAlign: CanvasTextAlign 
@@ -15,50 +12,78 @@ type Options = Readonly<{
 }>
 
 export const DEFAULT_OPTIONS: Options = {
-  canvasStylePosition: 'relative',
-  canvasStyleWidth: '100%',
-  canvasStyleHeight: '100%',
   tileBorderWidth: 1,
   defaultTileStrokeColor: 'black',
   tileTextAlign: "center",
   tileTextBaseLine: "middle" 
 }
+
+const INITIAL_STATE: I.LocalStorageState = {
+  moves: 0,
+  time: 0,
+  paused: true,
+  tiles: [],
+  tileMatrix: 4, 
+  unoccupiedPosition: { x: 3, y: 3 }
+}
 export default class Puzzle {
   private state: I.PuzzleState
 
+  private rootEl: HTMLElement
+  private displayEl: HTMLElement
   private canvasEl: HTMLCanvasElement
+  private controlsEl: HTMLElement
+
   private ctx: CanvasRenderingContext2D
   private canvasDims: I.CanvasDims
 
-  constructor(
-    rootEl: HTMLElement,
-    initialState: I.LocalStorageState = {
-      moves: 0,
-      time: 0,
-      paused: true,
-      tiles: [],
-      tileMatrix: 4, 
-      unoccupiedPosition: { x: 3, y: 3 }
-    },
-    options: Options = DEFAULT_OPTIONS,
-  ) {
+  constructor(rootEl: HTMLElement, initialState = INITIAL_STATE, options: Options = DEFAULT_OPTIONS) {
+    this.rootEl = rootEl
+
+    const display = document.createElement('div')
+    display.classList.add('display')
+
+    const counter = document.createElement('div')
+    counter.classList.add('counter')
+    counter.innerText = '5'
+
+    const timer = document.createElement('div')
+    timer.classList.add('timer')
+    timer.innerText = '10:55'
+
+    display.append(counter, timer)
+    this.displayEl = display
+
+    const controls = document.createElement('div')
+    controls.classList.add('controls')
+
+    const resetButton = document.createElement('button')
+    resetButton.classList.add('button')
+    resetButton.innerText = 'Reset'
+
+    const playButton = document.createElement('button')
+    playButton.classList.add('button')
+    playButton.innerText = 'Play'
+    
+    const saveButton = document.createElement('button')
+    saveButton.classList.add('button')
+    saveButton.innerText = 'Save'
+
+    const resultsButton = document.createElement('button')
+    resultsButton.classList.add('button')
+    resultsButton.innerText = 'Results'
+
+    controls.append(resetButton, playButton, saveButton, resultsButton)
+    this.controlsEl = controls 
+
     this.canvasEl = document.createElement('canvas')
-    this.canvasEl.style.position = options.canvasStylePosition 
-    this.canvasEl.style.width = options.canvasStyleWidth
-    this.canvasEl.style.height = options.canvasStyleHeight
-
-    rootEl.append(this.canvasEl)
-
-    this.canvasDims = utils.getCanvasDimensions(this.canvasEl)
-    this.canvasEl.width = this.canvasDims.pxWidth
-    this.canvasEl.height = this.canvasDims.pxHeight
+    this.canvasEl.classList.add('canvas')
 
     const canvasContext = this.canvasEl.getContext('2d')
 
     if(canvasContext === null) throw new Error('Cannot get canvas context')
 
     this.ctx = canvasContext
-    this.ctx.scale(this.canvasDims.dpr, this.canvasDims.dpr)
 
     const tiles: Map<I.TileId, TileComponent> = new Map()
 
@@ -142,6 +167,13 @@ export default class Puzzle {
   }
 
   private mount() {
+    this.rootEl.append(this.displayEl, this.canvasEl, this.controlsEl)
+
+    this.canvasDims = utils.getCanvasDimensions(this.canvasEl)
+    this.canvasEl.width = this.canvasDims.pxWidth
+    this.canvasEl.height = this.canvasDims.pxHeight
+    this.ctx.scale(this.canvasDims.dpr, this.canvasDims.dpr)
+
     this.canvasEl.oncontextmenu = () => false
 
     this.render()
@@ -160,16 +192,26 @@ export default class Puzzle {
 
   private render() {
     requestAnimationFrame(() => {
-      this.clear()  
-      
-      this.state.tiles.forEach((tile) => {
-        const tileDims = utils.getTileDimensions({
-          canvasSize: { width: this.canvasDims.cssWidth, height: this.canvasDims.cssHeight },
-          tileMatrix: this.state.tileMatrix,
-          tilePositionOnBoard: tile.positionOnBoard
-        })
+      this.clear()
+     
+      const boardDims = utils.getBoardDimensions({
+        canvasSize: { width: this.canvasDims.cssWidth, height: this.canvasDims.cssHeight },
+        tileMatrix: this.state.tileMatrix,
+      })
 
-        tile.updateDimensions(tileDims)
+      this.ctx.beginPath()
+      this.ctx.fillStyle = 'gray'
+      this.ctx.fillRect(boardDims.x, boardDims.y, boardDims.size, boardDims.size)
+      this.ctx.closePath()
+
+      this.state.tiles.forEach((tile) => {
+        const tileSize = boardDims.size / this.state.tileMatrix
+
+        tile.updateDimensions({
+          x: boardDims.x + tile.positionOnBoard.x * tileSize,
+          y: boardDims.y + tile.positionOnBoard.y * tileSize,
+          size: boardDims.size / this.state.tileMatrix
+        })
 
         tile.draw(this.ctx)
       })

@@ -1,32 +1,42 @@
 #root {
   position: fixed;
-  left: 0;
-  top: 0;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   width: 100vw;
   height: 100vh;
   z-index: 1;
-  min-width: 400px;
+  max-width: 2800px;
+  max-height: 2800px;
+  min-width: 320px;
 }
 
 .display {
   width: 100%;
   position: absolute;
-  top: 15px;
+  top: min(2vh, 2vw);
   display: flex;
   column-gap: 20px;
-  row-gap: 15px;
   justify-content: center;
 }
 
 .counter, .timer {
-  width: 100px;
-  height: 30px; 
-  border-radius: 0;
-  border: 1px solid black;
+  padding: 0;
+  margin: 0;
+  width: min(17vh, 17vw);
+  height: min(3.7vh, 3.7vw);
+  max-width: 200px;
+  border: min(1vh, 1vw) solid #DBE5E4;
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: sans-serif;
+  font-size: min(2.4vh, 2.4vw);
+  background-color: #BDC8B8;
+  text-shadow: 1px 1px 0px #9EAD9A;
+  box-shadow: inset 0px 0px 7px 0px #8F9A94;
+  color: #484A45;
 }
 
 .canvas {
@@ -42,15 +52,31 @@
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 15px;
+  bottom: min(2vh, 2vw);
 }
 
 .button {
-  width: 100px;
-  height: 30px; 
-  border-radius: 0;
-  border: 1px solid black;
-  background: none;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  width: min(15vh, 15vw);
+  height: min(4.5vh, 4.5vw); 
+  border: min(0.2vh, 0.2vw) solid rgba(0,0,0,.3);
+  border-radius: 3px;
+  background: linear-gradient(45deg, #423E3B, #726B65);
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: sans-serif;
+  font-size: min(2vh, 2vw);
+  text-transform: uppercase;
+  color: white;
+  box-shadow: inset 1px 0px 2px 1px #726B65;
+  font-weight: 300;
+}
+
+.button:hover {
+  background: linear-gradient(40deg, black, #423E3B);
+  box-shadow: inset 1px 0px 2px 1px #31312F;
 }

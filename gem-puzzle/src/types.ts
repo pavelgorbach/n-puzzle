@@ -26,7 +26,7 @@ export type CanvasDims = {
 
 export type PuzzleState = {
   tileMatrix: TileMatrix 
-  moves: number
+  count: number
   time: number
   paused: boolean
   tiles: Map<TileId, TileComponent>
@@ -35,7 +35,7 @@ export type PuzzleState = {
 
 export type LocalStorageState = {
   tileMatrix: TileMatrix 
-  moves: number
+  count: number
   time: number
   paused: boolean
   tiles: TileDTO[]

@@ -34,7 +34,7 @@ export default abstract class GameProgressLocalStorage {
       tiles: tiles,
       paused: state.paused,
       time: state.time,
-      moves: state.moves,
+      count: state.count,
       unoccupiedPosition: state.unoccupiedPosition
     }
 

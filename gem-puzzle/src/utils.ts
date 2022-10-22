@@ -15,7 +15,7 @@ export function getBoardDimensions(p: {
   tileMatrix: I.TileMatrix
 }) {
   const min = Math.min(p.canvasSize.width, p.canvasSize.height)
-  const tileSize = min / p.tileMatrix - 40
+  const tileSize = min / p.tileMatrix - (min / 20) 
   const boardSize = tileSize * p.tileMatrix
   const x = (p.canvasSize.width - boardSize) / 2
   const y = (p.canvasSize.height - boardSize) / 2
@@ -44,6 +44,7 @@ export function isTileNextToUnoccupied(tile: I.Position, unoccupied: I.Position)
 export function generateTiles(matrix: number): I.TileDTO[] {
   const length = Math.pow(matrix, 2) - 1
   const ids = Array.from({ length }, (_, idx) => idx.toString())
+  const shuffledIds = shuffle(ids)
   
   const tiles: I.TileDTO[] = []
 
@@ -51,9 +52,9 @@ export function generateTiles(matrix: number): I.TileDTO[] {
 
   for(let i = 0; i < matrix; i++) {
     for(let j = 0; j < matrix; j++) {
-      if(ids[idx]) {
+      if(shuffledIds[idx]) {
         tiles.push({
-          id: ids[idx] as I.TileId,
+          id: shuffledIds[idx] as I.TileId,
           positionOnBoard: { x: j, y: i },
         })
       }
@@ -64,7 +65,7 @@ export function generateTiles(matrix: number): I.TileDTO[] {
   return tiles
 }
 
-export function shuffleTiles<T>(data: T[]) {
+export function shuffle<T>(data: T[]) {
   const arr = [...data]
 
   for (let i = arr.length - 1; i > 0; i--) {

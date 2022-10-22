@@ -19,7 +19,7 @@ export const DEFAULT_OPTIONS: Options = {
 }
 
 const INITIAL_STATE: I.LocalStorageState = {
-  moves: 0,
+  count: 0,
   time: 0,
   paused: true,
   tiles: [],
@@ -27,17 +27,21 @@ const INITIAL_STATE: I.LocalStorageState = {
   unoccupiedPosition: { x: 3, y: 3 }
 }
 export default class Puzzle {
+  private options: Options
   private state: I.PuzzleState
 
   private rootEl: HTMLElement
   private displayEl: HTMLElement
+  private counterEl: HTMLElement
   private canvasEl: HTMLCanvasElement
   private controlsEl: HTMLElement
+  private resetButtonEl: HTMLElement
 
   private ctx: CanvasRenderingContext2D
   private canvasDims: I.CanvasDims
 
   constructor(rootEl: HTMLElement, initialState = INITIAL_STATE, options: Options = DEFAULT_OPTIONS) {
+    this.options = options
     this.rootEl = rootEl
 
     const display = document.createElement('div')
@@ -45,11 +49,12 @@ export default class Puzzle {
 
     const counter = document.createElement('div')
     counter.classList.add('counter')
-    counter.innerText = '5'
+    counter.innerText = `${initialState.count}`
+    this.counterEl = counter
 
     const timer = document.createElement('div')
     timer.classList.add('timer')
-    timer.innerText = '10:55'
+    timer.innerText = `${initialState.time}`
 
     display.append(counter, timer)
     this.displayEl = display
@@ -60,6 +65,7 @@ export default class Puzzle {
     const resetButton = document.createElement('button')
     resetButton.classList.add('button')
     resetButton.innerText = 'Reset'
+    this.resetButtonEl = resetButton 
 
     const playButton = document.createElement('button')
     playButton.classList.add('button')
@@ -90,8 +96,7 @@ export default class Puzzle {
     let initialTiles = initialState.tiles
 
     if(initialTiles.length === 0) {
-      const generatedTiles = utils.generateTiles(initialState.tileMatrix)
-      initialTiles = utils.shuffleTiles(generatedTiles)
+      initialTiles = utils.generateTiles(initialState.tileMatrix)
     }
 
     initialTiles.forEach((tile) => {
@@ -111,13 +116,29 @@ export default class Puzzle {
     this.mount()
   }
 
-  stopAndShuffle() {
-    const arr = [...this.state.tiles.values()]
-    const shuffledTiels = utils.shuffleTiles(arr)
+  reset() {
+    const tiles: Map<I.TileId, TileComponent> = new Map()
+    const generatedTiles = utils.generateTiles(this.state.tileMatrix)
 
-    shuffledTiels.forEach((tile) => {
-      this.state.tiles.set(tile.id, tile)
+    generatedTiles.forEach((tile) => {
+      tiles.set(
+        tile.id, 
+        new TileComponent(tile, {
+          borderWidth: this.options.tileBorderWidth,
+          strokeColor: this.options.defaultTileStrokeColor,
+          textAlign: this.options.tileTextAlign,
+          textBaseLine: this.options.tileTextBaseLine
+        })
+      )
     })
+
+    this.state.tiles = tiles
+    this.state.count = 0
+    this.state.unoccupiedPosition = {
+      x: this.state.tileMatrix - 1,
+      y: this.state.tileMatrix - 1
+    }
+    this.counterEl.innerHTML = `${this.state.count}`
 
     this.render()
   }
@@ -141,9 +162,16 @@ export default class Puzzle {
         const newPositionOnBoard = this.state.unoccupiedPosition
         this.state.unoccupiedPosition = tileMatch.positionOnBoard  
         tileMatch.positionOnBoard = newPositionOnBoard
-        
+       
+        this.state.count++
+        this.counterEl.innerText = `${this.state.count}`
+
         this.render()
       }
+    })
+
+    this.resetButtonEl.addEventListener('click', (e) => {
+      this.reset()
     })
   }
 
@@ -200,7 +228,7 @@ export default class Puzzle {
       })
 
       this.ctx.beginPath()
-      this.ctx.fillStyle = 'gray'
+      this.ctx.fillStyle = '#807C73'
       this.ctx.fillRect(boardDims.x, boardDims.y, boardDims.size, boardDims.size)
       this.ctx.closePath()
 

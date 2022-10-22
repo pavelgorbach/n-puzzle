@@ -15,7 +15,7 @@ export function getBoardDimensions(p: {
   tileMatrix: I.TileMatrix
 }) {
   const min = Math.min(p.canvasSize.width, p.canvasSize.height)
-  const tileSize = min / p.tileMatrix - (min / 20) 
+  const tileSize = min / p.tileMatrix - ((min / p.tileMatrix / 4)) 
   const boardSize = tileSize * p.tileMatrix
   const x = (p.canvasSize.width - boardSize) / 2
   const y = (p.canvasSize.height - boardSize) / 2

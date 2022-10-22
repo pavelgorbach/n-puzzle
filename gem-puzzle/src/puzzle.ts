@@ -33,11 +33,12 @@ export default class Puzzle {
   private rootEl: HTMLElement
   private displayEl: HTMLElement
   private counterEl: HTMLElement
+  private matrixButtonEl: HTMLButtonElement
   private canvasEl: HTMLCanvasElement
   private controlsEl: HTMLElement
-  private resetButtonEl: HTMLElement
-  private playButtonEl: HTMLElement
-  private saveButtonEl: HTMLElement
+  private resetButtonEl: HTMLButtonElement
+  private playButtonEl: HTMLButtonElement
+  private saveButtonEl: HTMLButtonElement
 
   private ctx: CanvasRenderingContext2D
   private canvasDims: I.CanvasDims
@@ -64,6 +65,11 @@ export default class Puzzle {
     const controls = document.createElement('div')
     controls.classList.add('controls')
 
+    const matrixButton = document.createElement('button')
+    matrixButton.classList.add('button', 'matrix')
+    matrixButton.innerText = `${initialState.tileMatrix}x${initialState.tileMatrix}`
+    this.matrixButtonEl = matrixButton 
+
     const resetButton = document.createElement('button')
     resetButton.classList.add('button')
     resetButton.innerText = 'Reset'
@@ -83,7 +89,7 @@ export default class Puzzle {
     resultsButton.classList.add('button')
     resultsButton.innerText = 'Results'
 
-    controls.append(resetButton, playButton, saveButton, resultsButton)
+    controls.append(matrixButton, resetButton, playButton, saveButton, resultsButton)
     this.controlsEl = controls 
 
     this.canvasEl = document.createElement('canvas')
@@ -166,6 +172,19 @@ export default class Puzzle {
     GameProgressLocalStorage.writeState(this.state)
   }
 
+  private changeTileMatrix() {
+    const matrix = this.state.tileMatrix + 1 as I.TileMatrix
+
+    if(matrix > 8) {
+      this.state.tileMatrix = 3
+      this.matrixButtonEl.innerText = '3x3' 
+    } else {
+      this.state.tileMatrix = matrix
+      this.matrixButtonEl.innerText = `${matrix}x${matrix}`
+    }
+    this.reset()
+  }
+
   private addEventListeners() {
     new ResizeObserver(() => this.render()).observe(this.canvasEl)
 
@@ -207,6 +226,10 @@ export default class Puzzle {
 
     this.saveButtonEl.addEventListener('click', () => {
       this.save()
+    })
+
+    this.matrixButtonEl.addEventListener('click', () => {
+      this.changeTileMatrix()
     })
   }
 

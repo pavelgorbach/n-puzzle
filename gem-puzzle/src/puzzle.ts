@@ -36,6 +36,7 @@ export default class Puzzle {
   private canvasEl: HTMLCanvasElement
   private controlsEl: HTMLElement
   private resetButtonEl: HTMLElement
+  private playButtonEl: HTMLElement
 
   private ctx: CanvasRenderingContext2D
   private canvasDims: I.CanvasDims
@@ -68,8 +69,9 @@ export default class Puzzle {
     this.resetButtonEl = resetButton 
 
     const playButton = document.createElement('button')
-    playButton.classList.add('button')
+    playButton.classList.add('button', 'play')
     playButton.innerText = 'Play'
+    this.playButtonEl = playButton
     
     const saveButton = document.createElement('button')
     saveButton.classList.add('button')
@@ -113,10 +115,13 @@ export default class Puzzle {
 
     this.state = { ...initialState, tiles }
 
+    this.canvasEl.style.cursor = 'pointer'
+    this.canvasEl.oncontextmenu = () => false
+
     this.mount()
   }
 
-  reset() {
+  private reset() {
     const tiles: Map<I.TileId, TileComponent> = new Map()
     const generatedTiles = utils.generateTiles(this.state.tileMatrix)
 
@@ -134,23 +139,41 @@ export default class Puzzle {
 
     this.state.tiles = tiles
     this.state.count = 0
+    this.state.time = 0
+    this.state.paused = true
     this.state.unoccupiedPosition = {
       x: this.state.tileMatrix - 1,
       y: this.state.tileMatrix - 1
     }
-    this.counterEl.innerHTML = `${this.state.count}`
+    this.counterEl.innerText = `${this.state.count}`
+    this.playButtonEl.innerText = `Play`
 
     this.render()
   }
 
-  save() {
+  private play() {
+    this.state.paused = false
+    this.playButtonEl.innerText = 'Pause'
+  }
+
+  private pause() {
+    this.state.paused = true
+    this.playButtonEl.innerText = 'Play'
+  }
+
+  private save() {
     GameProgressLocalStorage.writeState(this.state)
   }
 
   private addEventListeners() {
+    console.log(this.state.paused)
     new ResizeObserver(() => this.render()).observe(this.canvasEl)
 
     this.canvasEl.addEventListener('mousedown', (e) => {
+      if(this.state.paused) {
+        return
+      }
+
       const cursorPosition = { x: e.offsetX, y: e.offsetY }
       const tileMatch = this.findTileByPosition(cursorPosition)
 
@@ -170,8 +193,16 @@ export default class Puzzle {
       }
     })
 
-    this.resetButtonEl.addEventListener('click', (e) => {
+    this.resetButtonEl.addEventListener('click', () => {
       this.reset()
+    })
+
+    this.playButtonEl.addEventListener('click', () => {
+      if(this.state.paused) {
+        this.play()
+      } else {
+        this.pause()
+      }
     })
   }
 
@@ -201,8 +232,6 @@ export default class Puzzle {
     this.canvasEl.width = this.canvasDims.pxWidth
     this.canvasEl.height = this.canvasDims.pxHeight
     this.ctx.scale(this.canvasDims.dpr, this.canvasDims.dpr)
-
-    this.canvasEl.oncontextmenu = () => false
 
     this.render()
     this.addEventListeners()

@@ -27,7 +27,7 @@
   height: min(3.7vh, 3.7vw);
   max-width: 200px;
   border: min(1vh, 1vw) solid #DBE5E4;
-  border-radius: 5px;
+  border-radius: min(.5vh, .5vw);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -62,7 +62,7 @@
   width: min(15vh, 15vw);
   height: min(4.5vh, 4.5vw); 
   border: min(0.2vh, 0.2vw) solid rgba(0,0,0,.3);
-  border-radius: 3px;
+  border-radius: min(.5vh, .5vw);
   background: linear-gradient(45deg, #423E3B, #726B65);
   cursor: pointer;
   display: flex;
@@ -79,4 +79,14 @@
 .button:hover {
   background: linear-gradient(40deg, black, #423E3B);
   box-shadow: inset 1px 0px 2px 1px #31312F;
+}
+
+.button.play {
+  background: linear-gradient(45deg, #F9630C, #EE7F0C);
+  box-shadow: inset 1px 0px 2px 1px #EC9A60;
+}
+
+.button.play:hover {
+  background: linear-gradient(45deg, #FA4107, #EE7F0C);
+  box-shadow: inset 1px 0px 2px 1px #EC9A60;
 }

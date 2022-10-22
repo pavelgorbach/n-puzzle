@@ -37,6 +37,7 @@ export default class Puzzle {
   private controlsEl: HTMLElement
   private resetButtonEl: HTMLElement
   private playButtonEl: HTMLElement
+  private saveButtonEl: HTMLElement
 
   private ctx: CanvasRenderingContext2D
   private canvasDims: I.CanvasDims
@@ -70,12 +71,13 @@ export default class Puzzle {
 
     const playButton = document.createElement('button')
     playButton.classList.add('button', 'play')
-    playButton.innerText = 'Play'
+    playButton.innerText = initialState.paused ? 'Play' : 'Pause'
     this.playButtonEl = playButton
     
     const saveButton = document.createElement('button')
     saveButton.classList.add('button')
     saveButton.innerText = 'Save'
+    this.saveButtonEl = saveButton
 
     const resultsButton = document.createElement('button')
     resultsButton.classList.add('button')
@@ -101,7 +103,7 @@ export default class Puzzle {
       initialTiles = utils.generateTiles(initialState.tileMatrix)
     }
 
-    initialTiles.forEach((tile) => {
+    initialTiles.forEach((tile, idx) => {
       tiles.set(
         tile.id,
         new TileComponent(tile, {
@@ -122,6 +124,7 @@ export default class Puzzle {
   }
 
   private reset() {
+    GameProgressLocalStorage.clearState()
     const tiles: Map<I.TileId, TileComponent> = new Map()
     const generatedTiles = utils.generateTiles(this.state.tileMatrix)
 
@@ -140,13 +143,11 @@ export default class Puzzle {
     this.state.tiles = tiles
     this.state.count = 0
     this.state.time = 0
-    this.state.paused = true
     this.state.unoccupiedPosition = {
       x: this.state.tileMatrix - 1,
       y: this.state.tileMatrix - 1
     }
     this.counterEl.innerText = `${this.state.count}`
-    this.playButtonEl.innerText = `Play`
 
     this.render()
   }
@@ -166,7 +167,6 @@ export default class Puzzle {
   }
 
   private addEventListeners() {
-    console.log(this.state.paused)
     new ResizeObserver(() => this.render()).observe(this.canvasEl)
 
     this.canvasEl.addEventListener('mousedown', (e) => {
@@ -203,6 +203,10 @@ export default class Puzzle {
       } else {
         this.pause()
       }
+    })
+
+    this.saveButtonEl.addEventListener('click', () => {
+      this.save()
     })
   }
 
@@ -257,7 +261,7 @@ export default class Puzzle {
       })
 
       this.ctx.beginPath()
-      this.ctx.fillStyle = '#807C73'
+      this.ctx.fillStyle = '#928C86'
       this.ctx.fillRect(boardDims.x, boardDims.y, boardDims.size, boardDims.size)
       this.ctx.closePath()
 

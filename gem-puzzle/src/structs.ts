@@ -5,7 +5,6 @@ const tileId = (): Struct<I.TileId, null> => string() as any
 
 export const Tile: Struct<I.TileDTO> = object({
   id: tileId(),
-  size: number(),
   positionOnBoard: object({
     x: number(),
     y: number(),

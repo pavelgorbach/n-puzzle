@@ -10,6 +10,6 @@ rootElement.id = 'root'
 
 document.body.append(rootElement)
 
-const initialState = GameProgressLocalStorage.readState() || undefined 
+const initialState = GameProgressLocalStorage.readState() || undefined
 
 new Puzzle(rootElement, initialState)

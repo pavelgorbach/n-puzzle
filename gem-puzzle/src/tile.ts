@@ -26,7 +26,10 @@ export default class TileComponent {
   toObject = (): I.TileDTO => {
     return {
       id: this.id,
-      positionOnBoard: this.positionOnBoard
+      positionOnBoard: {
+        x: this.positionOnBoard.x,
+        y: this.positionOnBoard.y
+      }
     }
   }
 

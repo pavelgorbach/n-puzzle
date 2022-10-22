@@ -2,24 +2,28 @@ import { LocalStorageState, PuzzleState } from "./types"
 import * as structs from './structs'
 
 export default abstract class GameProgressLocalStorage {
-  static STORAGE_KEY: 'GAME_PROGRESS' 
+  static STORAGE_KEY = 'GAME_PROGRESS' 
 
-  static readState = (): LocalStorageState | null => {
-    const initialState = localStorage.getItem(this.STORAGE_KEY)
+  static readState = (storageKey = GameProgressLocalStorage.STORAGE_KEY): LocalStorageState | null => {
+    const initialState = window.localStorage.getItem(this.STORAGE_KEY)
 
     if (initialState === null) return null
 
     try {
       const parsedState: unknown = JSON.parse(initialState)
-
       structs.LocalStorageState.assert(parsedState)
+
       return parsedState
     } catch (e) {
-      console.warn('Could not parse GameProgressLocalStorage')
-      localStorage.removeItem(this.STORAGE_KEY)
+      console.warn('Could not parse GameProgressLocalStorage', e)
+      this.clearState()
     }
 
     return null
+  }
+
+  static clearState() {
+    localStorage.removeItem(this.STORAGE_KEY)
   }
 
   static writeState = (state: PuzzleState) => {
@@ -39,7 +43,7 @@ export default abstract class GameProgressLocalStorage {
     }
 
     const encoded = JSON.stringify(localStorageState)
-    
+
     window.localStorage.setItem(this.STORAGE_KEY, encoded)
   }
 }

@@ -5,7 +5,7 @@
     "allowSyntheticDefaultImports": true,
     "noImplicitAny": true,
     "module": "es6",
-    "target": "es2015",
+    "target": "esnext",
     "allowJs": true
   },
   "files": ["src/index.ts"]

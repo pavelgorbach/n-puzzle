@@ -81,6 +81,10 @@
   box-shadow: inset 1px 0px 2px 1px #31312F;
 }
 
+.button:active {
+  opacity: .8;
+}
+
 .button.play {
   background: linear-gradient(45deg, #F9630C, #EE7F0C);
   box-shadow: inset 1px 0px 2px 1px #EC9A60;

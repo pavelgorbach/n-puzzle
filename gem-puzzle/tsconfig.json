@@ -8,5 +8,5 @@
     "target": "esnext",
     "allowJs": true
   },
-  "files": ["src/index.ts"]
+  "files": ["src/index.ts", "src/custom.d.ts"]
 }

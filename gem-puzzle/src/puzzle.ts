@@ -1,6 +1,11 @@
 import * as I from './types'
 import * as utils from './utils'
 
+import soundOnIcon from './assets/icons/sound-on.svg'
+import soundOffIcon from './assets/icons/sound-off.svg'
+import musicOnIcon from './assets/icons/music-note.svg'
+import musicOffIcon from './assets/icons/music-note-crossed-out.svg'
+
 import GameProgressLocalStorage from './localStorage'
 import TileComponent from './tile'
 
@@ -44,6 +49,8 @@ export default class Puzzle {
   private saveButtonEl: HTMLButtonElement
   private soundButtonEl: HTMLButtonElement
   private musicButtonEl: HTMLButtonElement
+  private soundIconEl: HTMLImageElement
+  private musicIconEl: HTMLImageElement
 
   private ctx: CanvasRenderingContext2D
   private canvasDims: I.CanvasDims
@@ -68,7 +75,17 @@ export default class Puzzle {
     this.timerEl.classList.add('timer')
     this.timerEl.innerText = `${initialState.time}`
 
-    // this.displayEl.append(this.counterEl, this.timerEl)
+    this.musicButtonEl = document.createElement('button')
+    this.musicButtonEl.classList.add('button', 'music')
+    this.musicIconEl = document.createElement('img') 
+    this.musicIconEl.src = musicOnIcon
+    this.musicButtonEl.append(this.musicIconEl)
+
+    this.soundButtonEl = document.createElement('button')
+    this.soundButtonEl.classList.add('button', 'sound')
+    this.soundIconEl = document.createElement('img') 
+    this.soundIconEl.src = soundOnIcon
+    this.soundButtonEl.append(this.soundIconEl)
 
     this.controlsEl = document.createElement('div')
     this.controlsEl.classList.add('controls')
@@ -93,21 +110,13 @@ export default class Puzzle {
     resultsButton.classList.add('button')
     resultsButton.innerText = 'Results'
 
-    this.resetBoardFx = new Audio(require('./fx/reset.mp3').default) 
-    this.tileTickFx = new Audio(require('./fx/hit.wav').default) 
-    this.backgroundFx = new Audio(require('./fx/serenity.mp3').default)
+    this.resetBoardFx = new Audio(require('./assets/fx/reset.mp3').default) 
+    this.tileTickFx = new Audio(require('./assets/fx/hit.wav').default) 
+    this.backgroundFx = new Audio(require('./assets/fx/serenity.mp3').default)
     this.backgroundFx.loop = true 
-    this.buttonPressFx = new Audio(require('./fx/button-press.mp3').default) 
+    this.buttonPressFx = new Audio(require('./assets/fx/button-press.mp3').default) 
 
-    this.musicButtonEl = document.createElement('button')
-    this.musicButtonEl.classList.add('button', 'sound')
-    this.musicButtonEl.innerText = 'On'
-
-    this.soundButtonEl = document.createElement('button')
-    this.soundButtonEl.classList.add('button', 'sound')
-    this.soundButtonEl.innerText = 'On'
-
-    this.displayEl.append(this.counterEl, this.timerEl, this.soundButtonEl, this.musicButtonEl)
+    this.displayEl.append(this.soundButtonEl, this.counterEl, this.timerEl, this.musicButtonEl)
     this.controlsEl.append(this.matrixButtonEl, this.resetButtonEl, this.playButtonEl, this.saveButtonEl, resultsButton)
 
     this.canvasEl = document.createElement('canvas')
@@ -216,12 +225,20 @@ export default class Puzzle {
   }
 
   private toggleSound() {
-    this.soundButtonEl.innerText = this.state.sound ? 'Off' : 'On'
+    if(this.state.sound) {
+      this.soundIconEl.src = soundOffIcon 
+    } else {
+      this.soundIconEl.src = soundOnIcon
+    } 
     this.state.sound = !this.state.sound
   }
 
   private toggleMusic() {
-    this.musicButtonEl.innerText = this.state.music ? 'Off' : 'On'
+    if(this.state.music) {
+      this.musicIconEl.src = musicOffIcon 
+    } else {
+      this.musicIconEl.src = musicOnIcon 
+    } 
     this.state.music = !this.state.music
 
     if(!this.state.music) {

@@ -96,6 +96,14 @@
   box-shadow: inset 1px 0px 2px 1px #EC9A60;
 }
 
-.button.matrix, .button.sound {
+.button.matrix, .button.sound, button.music {
   width: min(7vh, 7vw);
+}
+
+.button.sound > img {
+  max-height: 90%;
+}
+
+.button.music > img {
+  max-height: 80%;
 }

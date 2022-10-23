@@ -18,6 +18,8 @@
   display: flex;
   column-gap: 20px;
   justify-content: center;
+  align-items: center;
+  z-index: 1;
 }
 
 .counter, .timer {
@@ -46,7 +48,7 @@
 
 .controls {
   display: grid;
-  grid-template-columns: repeat(5, auto);
+  grid-template-columns: repeat(7, auto);
   column-gap: 5px;
   position: absolute;
   left: 50%;
@@ -58,7 +60,7 @@
   box-sizing: border-box;
   padding: 0;
   margin: 0;
-  width: min(15vh, 15vw);
+  width: min(14vh, 14vw);
   height: min(4.5vh, 4.5vw);
   border: min(0.2vh, 0.2vw) solid rgba(0,0,0,.3);
   border-radius: min(.5vh, .5vw);
@@ -94,17 +96,6 @@
   box-shadow: inset 1px 0px 2px 1px #EC9A60;
 }
 
-.button.matrix {
-  opacity: .9;
+.button.matrix, .button.sound {
   width: min(7vh, 7vw);
-  background: linear-gradient(45deg, #2456B8, #345AA1);
-  box-shadow: inset 1px 0px 2px 1px #547FD2;
-}
-
-.button.matrix:hover {
-  opacity: 1;
-}
-
-.button.matrix:active {
-  opacity: .8;
 }

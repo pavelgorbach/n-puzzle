@@ -1,4 +1,5 @@
 import TileComponent from './tile'
+import Timer from './timer'
 
 type Brand<K, T> = K & { __brand: T }
 
@@ -27,7 +28,7 @@ export type CanvasDims = {
 export type PuzzleState = {
   tileMatrix: TileMatrix 
   count: number
-  time: number
+  time: Timer 
   paused: boolean
   tiles: Map<TileId, TileComponent>
   unoccupiedPosition: Position
@@ -38,7 +39,7 @@ export type PuzzleState = {
 export type LocalStorageState = {
   tileMatrix: TileMatrix 
   count: number
-  time: number
+  time: number 
   paused: boolean
   tiles: TileDTO[]
   unoccupiedPosition: Position

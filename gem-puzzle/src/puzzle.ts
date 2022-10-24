@@ -8,6 +8,7 @@ import musicOffIcon from './assets/icons/music-note-crossed-out.svg'
 
 import GameProgressLocalStorage from './localStorage'
 import TileComponent from './tile'
+import TimerComponent from './timer'
 
 type Options = Readonly<{
   tileBorderWidth: number
@@ -39,13 +40,14 @@ export default class Puzzle {
 
   private rootEl: HTMLElement
   private displayEl: HTMLElement
+  private indicatorEl: HTMLElement
   private counterEl: HTMLElement
   private timerEl: HTMLElement
   private matrixButtonEl: HTMLButtonElement
   private canvasEl: HTMLCanvasElement
   private controlsEl: HTMLElement
   private resetButtonEl: HTMLButtonElement
-  private playButtonEl: HTMLButtonElement
+  private startButtonEl: HTMLButtonElement
   private saveButtonEl: HTMLButtonElement
   private soundButtonEl: HTMLButtonElement
   private musicButtonEl: HTMLButtonElement
@@ -67,6 +69,9 @@ export default class Puzzle {
     this.displayEl = document.createElement('div')
     this.displayEl.classList.add('display')
 
+    this.indicatorEl = document.createElement('div')
+    this.indicatorEl.classList.add('indicator', 'paused')
+
     this.counterEl = document.createElement('div')
     this.counterEl.classList.add('counter')
     this.counterEl.innerText = `${initialState.count}`
@@ -78,13 +83,13 @@ export default class Puzzle {
     this.musicButtonEl = document.createElement('button')
     this.musicButtonEl.classList.add('button', 'music')
     this.musicIconEl = document.createElement('img') 
-    this.musicIconEl.src = musicOnIcon
+    this.musicIconEl.src = initialState.music ? musicOnIcon : musicOffIcon
     this.musicButtonEl.append(this.musicIconEl)
 
     this.soundButtonEl = document.createElement('button')
     this.soundButtonEl.classList.add('button', 'sound')
     this.soundIconEl = document.createElement('img') 
-    this.soundIconEl.src = soundOnIcon
+    this.soundIconEl.src = initialState.sound ? soundOnIcon : soundOffIcon
     this.soundButtonEl.append(this.soundIconEl)
 
     this.controlsEl = document.createElement('div')
@@ -95,12 +100,12 @@ export default class Puzzle {
     this.matrixButtonEl.innerText = `${initialState.tileMatrix}x${initialState.tileMatrix}`
 
     this.resetButtonEl = document.createElement('button')
-    this.resetButtonEl.classList.add('button')
+    this.resetButtonEl.classList.add('button', 'reset')
     this.resetButtonEl.innerText = 'Reset'
 
-    this.playButtonEl = document.createElement('button')
-    this.playButtonEl.classList.add('button', 'play')
-    this.playButtonEl.innerText = initialState.paused ? 'Play' : 'Pause'
+    this.startButtonEl = document.createElement('button')
+    this.startButtonEl.classList.add('button', 'play')
+    this.startButtonEl.innerText = initialState.paused ? 'Start' : 'Pause'
     
     this.saveButtonEl = document.createElement('button')
     this.saveButtonEl.classList.add('button')
@@ -110,14 +115,27 @@ export default class Puzzle {
     resultsButton.classList.add('button')
     resultsButton.innerText = 'Results'
 
-    this.resetBoardFx = new Audio(require('./assets/fx/reset.mp3').default) 
+    this.resetBoardFx = new Audio(require('./assets/fx/shuffle.mp3').default) 
     this.tileTickFx = new Audio(require('./assets/fx/hit.wav').default) 
     this.backgroundFx = new Audio(require('./assets/fx/serenity.mp3').default)
     this.backgroundFx.loop = true 
     this.buttonPressFx = new Audio(require('./assets/fx/button-press.mp3').default) 
 
-    this.displayEl.append(this.soundButtonEl, this.counterEl, this.timerEl, this.musicButtonEl)
-    this.controlsEl.append(this.matrixButtonEl, this.resetButtonEl, this.playButtonEl, this.saveButtonEl, resultsButton)
+    this.displayEl.append(
+      this.matrixButtonEl,
+      this.resetButtonEl,
+      this.counterEl,
+      this.timerEl,
+      this.soundButtonEl,
+      this.musicButtonEl,
+    )
+
+    this.controlsEl.append(
+      this.indicatorEl,
+      this.startButtonEl,
+      this.saveButtonEl,
+      resultsButton
+    )
 
     this.canvasEl = document.createElement('canvas')
     this.canvasEl.classList.add('canvas')
@@ -148,7 +166,9 @@ export default class Puzzle {
       )
     })
 
-    this.state = { ...initialState, tiles }
+    const time = new TimerComponent(this.timerEl, initialState.time)
+
+    this.state = { ...initialState, tiles, time }
 
     this.canvasEl.style.cursor = 'pointer'
     this.canvasEl.oncontextmenu = () => false
@@ -157,8 +177,10 @@ export default class Puzzle {
   }
 
   private reset() {
-    this.resetBoardFx.currentTime = 0
-    this.resetBoardFx.play()
+    if(this.state.sound) {
+      this.resetBoardFx.play()
+    }
+    this.backgroundFx.currentTime = 0
 
     GameProgressLocalStorage.clearState()
 
@@ -179,7 +201,7 @@ export default class Puzzle {
 
     this.state.tiles = tiles
     this.state.count = 0
-    this.state.time = 0
+    this.state.time.reset()
     this.state.unoccupiedPosition = {
       x: this.state.tileMatrix - 1,
       y: this.state.tileMatrix - 1
@@ -191,18 +213,24 @@ export default class Puzzle {
 
   private async play() {
     this.state.paused = false
-    this.playButtonEl.innerText = 'Pause'
+    this.startButtonEl.innerText = 'Pause'
+    this.indicatorEl.classList.toggle('paused')
 
     if(this.state.music) {
       this.backgroundFx.play()
     }
+
+    this.state.time.start()
   }
 
   private pause() {
     this.state.paused = true
-    this.playButtonEl.innerText = 'Play'
+    this.startButtonEl.innerText = 'Start'
+    this.indicatorEl.classList.toggle('paused')
 
-    if(this.state.sound) {
+    this.state.time.pause()
+
+    if(this.state.music) {
       this.backgroundFx.pause()
     }
   }
@@ -253,8 +281,10 @@ export default class Puzzle {
   }
 
   private buttonPress() {
-    this.buttonPressFx.currentTime = 0
-    this.buttonPressFx.play()
+    if(this.state.sound) {
+      this.buttonPressFx.currentTime = 0
+      this.buttonPressFx.play()
+    }
   }
 
   private addEventListeners() {
@@ -262,6 +292,7 @@ export default class Puzzle {
 
     this.canvasEl.addEventListener('mousedown', async (e) => {
       if(this.state.paused) {
+        alert('click START button')
         return
       }
 
@@ -294,7 +325,7 @@ export default class Puzzle {
       this.reset()
     })
 
-    this.playButtonEl.addEventListener('click', () => {
+    this.startButtonEl.addEventListener('click', () => {
       this.buttonPress()
       if(this.state.paused) {
         this.play()
@@ -322,6 +353,13 @@ export default class Puzzle {
       this.buttonPress()
       this.toggleMusic()
     })
+
+    window.addEventListener('beforeunload', (e) => {
+      // this.pause()
+      // e.preventDefault()
+      // e.returnValue = ''
+    })
+    
   }
 
   private findTileByPosition = (p: { x: number, y: number }): TileComponent | null => {

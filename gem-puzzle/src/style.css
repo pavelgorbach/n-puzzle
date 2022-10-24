@@ -16,10 +16,34 @@
   position: absolute;
   top: min(2vh, 2vw);
   display: flex;
-  column-gap: 20px;
+  column-gap: min(1vh, 1vw);
   justify-content: center;
   align-items: center;
   z-index: 1;
+}
+
+.indicator {
+  width: min(1.5vh, 1.5vw);
+  height: min(1.5vh, 1.5vw);
+  background-color: #6DFCD1;
+  border-radius: 50%;
+  box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #304701 0 -1px 9px, #89FF00 0 2px 12px;
+}
+
+.indicator.paused {
+  background-color: #FF0;
+  box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #808002 0 -1px 9px, #FF0 0 2px 12px;
+  -webkit-animation: blinkYellow 1s infinite;
+  -moz-animation: blinkYellow 1s infinite;
+  -ms-animation: blinkYellow 1s infinite;
+  -o-animation: blinkYellow 1s infinite;
+  animation: blinkYellow 1s infinite;
+}
+
+@keyframes blinkYellow {
+  from { background-color: #FF0; }
+  50% { background-color: #AA0; box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #808002 0 -1px 9px, #FF0 0 2px 0; }
+  to { background-color: #FF0; }
 }
 
 .counter, .timer {
@@ -49,11 +73,12 @@
 .controls {
   display: grid;
   grid-template-columns: repeat(7, auto);
-  column-gap: 5px;
+  column-gap: min(2vh, 2vw);
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
   bottom: min(2vh, 2vw);
+  align-items: center;
 }
 
 .button {
@@ -96,7 +121,7 @@
   box-shadow: inset 1px 0px 2px 1px #EC9A60;
 }
 
-.button.matrix, .button.sound, button.music {
+.button.matrix, .button.sound, button.music, button.reset {
   width: min(7vh, 7vw);
 }
 

@@ -33,11 +33,13 @@ export default abstract class GameProgressLocalStorage {
       tiles.push(tile.toObject())
     })
 
+    const time = state.time.spentTime
+
     const localStorageState: LocalStorageState = {
       tileMatrix: state.tileMatrix,
       tiles: tiles,
-      paused: state.paused,
-      time: state.time,
+      paused: true,
+      time,
       count: state.count,
       unoccupiedPosition: state.unoccupiedPosition,
       sound: state.sound,

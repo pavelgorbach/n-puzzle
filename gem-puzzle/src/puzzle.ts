@@ -423,6 +423,7 @@ export default class Puzzle {
 
     this.resultsButtonEl.addEventListener('click', () => {
       this.showResults = !this.showResults 
+      if(this.state.completed) this.state.completed = false
       this.render()
     })
 

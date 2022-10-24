@@ -1,2 +1,3 @@
-# pavelgorbach-JSFE2022Q3
-Private repository for @pavelgorbach
+# 🚀 Welcome to N Puzzle!
+
+Enjoy the game!

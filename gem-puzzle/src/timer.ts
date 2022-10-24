@@ -1,3 +1,4 @@
+import * as utils from './utils'
 export default class Timer {
   containerEl: HTMLElement
   paused: boolean
@@ -9,17 +10,7 @@ export default class Timer {
     this.containerEl = containerEl
     this.spentTime = spentTime
     this.paused = true
-
-    const seconds = this.pad((this.spentTime / 1000) % 60)
-    const minutes = this.pad((this.spentTime / (60 * 1000)) % 60)
-    const hours = this.pad((this.spentTime / (60 * 60 * 1000)) % 24)
-    const days = this.pad(this.spentTime / (24 * 60 * 60 * 1000))
-
-    this.containerEl.innerText = `${days}:${hours}:${minutes}:${seconds}`
-  }
-
-  pad(value: number) {
-    return ('0' + Math.floor(value)).slice(-2)
+    this.containerEl.innerText = utils.secondsToDHMS(this.spentTime)
   }
 
   pause() {
@@ -36,12 +27,7 @@ export default class Timer {
     const now = new Date().getTime()
     this.spentTime = now - this.startTime
 
-    const seconds = this.pad((this.spentTime / 1000) % 60)
-    const minutes = this.pad((this.spentTime / (60 * 1000)) % 60)
-    const hours = this.pad((this.spentTime / (60 * 60 * 1000)) % 24)
-    const days = this.pad(this.spentTime / (24 * 60 * 60 * 1000))
-
-    this.containerEl.innerText = `${days}:${hours}:${minutes}:${seconds}`
+    this.containerEl.innerText = utils.secondsToDHMS(this.spentTime)
 
     if (!this.paused) {
       requestAnimationFrame(() => this.count())

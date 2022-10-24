@@ -43,7 +43,8 @@ export default abstract class GameProgressLocalStorage {
       count: state.count,
       unoccupiedPosition: state.unoccupiedPosition,
       sound: state.sound,
-      music: state.music
+      music: state.music,
+      completed: false
     }
 
     const encoded = JSON.stringify(localStorageState)

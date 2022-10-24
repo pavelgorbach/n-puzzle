@@ -40,6 +40,12 @@
   animation: blinkYellow 1s infinite;
 }
 
+.indicator.completed {
+  background-color: gray;
+  box-shadow: none;
+  animation: none
+}
+
 @keyframes blinkYellow {
   from { background-color: #FF0; }
   50% { background-color: #AA0; box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #808002 0 -1px 9px, #FF0 0 2px 0; }
@@ -102,12 +108,12 @@
   font-weight: 300;
 }
 
-.button:hover {
+.button:hover:enabled {
   background: linear-gradient(40deg, black, #423E3B);
   box-shadow: inset 1px 0px 2px 1px #31312F;
 }
 
-.button:active {
+.button:active:enabled {
   opacity: .8;
 }
 
@@ -116,7 +122,7 @@
   box-shadow: inset 1px 0px 2px 1px #EC9A60;
 }
 
-.button.play:hover {
+.button.play:hover:enabled {
   background: linear-gradient(45deg, #FA4107, #EE7F0C);
   box-shadow: inset 1px 0px 2px 1px #EC9A60;
 }
@@ -131,4 +137,8 @@
 
 .button.music > img {
   max-height: 80%;
+}
+
+.button:disabled {
+  cursor: not-allowed;
 }

@@ -32,7 +32,8 @@ const INITIAL_STATE: I.LocalStorageState = {
   tileMatrix: 4, 
   unoccupiedPosition: { x: 3, y: 3 },
   sound: true,
-  music: true 
+  music: true,
+  completed: false
 }
 export default class Puzzle {
   private options: Options
@@ -53,6 +54,7 @@ export default class Puzzle {
   private musicButtonEl: HTMLButtonElement
   private soundIconEl: HTMLImageElement
   private musicIconEl: HTMLImageElement
+  private resultsEl: HTMLElement
 
   private ctx: CanvasRenderingContext2D
   private canvasDims: I.CanvasDims
@@ -61,6 +63,7 @@ export default class Puzzle {
   private resetBoardFx: HTMLAudioElement
   private tileTickFx: HTMLAudioElement
   private buttonPressFx: HTMLAudioElement
+  private cheeringFx: HTMLAudioElement
 
   constructor(rootEl: HTMLElement, initialState = INITIAL_STATE, options: Options = DEFAULT_OPTIONS) {
     this.options = options
@@ -120,6 +123,7 @@ export default class Puzzle {
     this.backgroundFx = new Audio(require('./assets/fx/serenity.mp3').default)
     this.backgroundFx.loop = true 
     this.buttonPressFx = new Audio(require('./assets/fx/button-press.mp3').default) 
+    this.cheeringFx = new Audio(require('./assets/fx/firework.mp3').default) 
 
     this.displayEl.append(
       this.matrixButtonEl,
@@ -136,6 +140,9 @@ export default class Puzzle {
       this.saveButtonEl,
       resultsButton
     )
+
+    this.resultsEl = document.createElement('div')
+    this.resultsEl.classList.add('results')
 
     this.canvasEl = document.createElement('canvas')
     this.canvasEl.classList.add('canvas')
@@ -177,10 +184,15 @@ export default class Puzzle {
   }
 
   private reset() {
-    if(this.state.sound) {
-      this.resetBoardFx.play()
+    this.pause()
+    if(this.state.sound) this.resetBoardFx.play()
+    if(this.state.music) this.backgroundFx.currentTime = 0
+    if(this.state.completed) {
+      this.state.completed = false
+      this.indicatorEl.classList.remove('completed')
+      this.startButtonEl.disabled = false
+      this.saveButtonEl.disabled = false
     }
-    this.backgroundFx.currentTime = 0
 
     GameProgressLocalStorage.clearState()
 
@@ -211,10 +223,10 @@ export default class Puzzle {
     this.render()
   }
 
-  private async play() {
+  private async start() {
     this.state.paused = false
     this.startButtonEl.innerText = 'Pause'
-    this.indicatorEl.classList.toggle('paused')
+    this.indicatorEl.classList.remove('paused')
 
     if(this.state.music) {
       this.backgroundFx.play()
@@ -226,7 +238,7 @@ export default class Puzzle {
   private pause() {
     this.state.paused = true
     this.startButtonEl.innerText = 'Start'
-    this.indicatorEl.classList.toggle('paused')
+    this.indicatorEl.classList.add('paused')
 
     this.state.time.pause()
 
@@ -287,12 +299,56 @@ export default class Puzzle {
     }
   }
 
+  private complete() {
+    this.cheeringFx.play()
+    this.state.completed = true
+
+    let results = [{ moves: this.state.count, spentTime: this.state.time.spentTime }]
+    const resultsLocalStorage = window.localStorage.getItem('RESULTS')
+
+    if(resultsLocalStorage) {
+      const previousResults = JSON.parse(resultsLocalStorage)
+      results = [...results, ...previousResults]
+      results.sort((a, b) => a.spentTime - b.spentTime)
+      results = results.slice(0, 10)
+    }
+
+    window.localStorage.setItem('RESULTS', JSON.stringify(results))
+
+    this.state.paused = true
+    this.state.time.pause()
+    this.indicatorEl.classList.add('completed')
+    this.startButtonEl.innerText = 'Completed'
+    this.startButtonEl.disabled = true
+    this.saveButtonEl.disabled = true
+  }
+
+  private isCompleted() {
+    let idx = 0
+
+    loop:
+    for(let i = 0; i < this.state.tileMatrix; i++) {
+      for(let j = 0; j < this.state.tileMatrix; j++) {
+        const tile = this.state.tiles.get(`${idx}` as I.TileId)
+        if(tile && tile.id === `${idx}` && tile.positionOnBoard.x === j && tile.positionOnBoard.y === i) {
+          idx++
+        } else {
+          break loop
+        }
+      }
+    }
+
+    return idx === this.state.tiles.size
+  }
+
   private addEventListeners() {
     new ResizeObserver(() => this.render()).observe(this.canvasEl)
 
     this.canvasEl.addEventListener('mousedown', async (e) => {
+      if(this.state.completed) return
+
       if(this.state.paused) {
-        alert('click START button')
+        this.start()
         return
       }
 
@@ -316,6 +372,10 @@ export default class Puzzle {
           this.tileTickFx.play()
         }
 
+        if(this.isCompleted()) {
+          this.complete()
+        }
+
         this.render()
       }
     })
@@ -328,13 +388,16 @@ export default class Puzzle {
     this.startButtonEl.addEventListener('click', () => {
       this.buttonPress()
       if(this.state.paused) {
-        this.play()
+        this.start()
       } else {
         this.pause()
       }
     })
 
     this.saveButtonEl.addEventListener('click', () => {
+      if(this.state.completed) {
+        return
+      }
       this.buttonPress()
       this.save()
     })
@@ -382,7 +445,7 @@ export default class Puzzle {
   }
 
   private mount() {
-    this.rootEl.append(this.displayEl, this.canvasEl, this.controlsEl)
+    this.rootEl.append(this.displayEl, this.canvasEl, this.controlsEl, this.resultsEl)
 
     this.canvasDims = utils.getCanvasDimensions(this.canvasEl)
     this.canvasEl.width = this.canvasDims.pxWidth
@@ -415,7 +478,6 @@ export default class Puzzle {
       this.ctx.beginPath()
       this.ctx.fillStyle = '#928C86'
       this.ctx.fillRect(boardDims.x, boardDims.y, boardDims.size, boardDims.size)
-      this.ctx.closePath()
 
       this.state.tiles.forEach((tile) => {
         const tileSize = boardDims.size / this.state.tileMatrix
@@ -428,6 +490,20 @@ export default class Puzzle {
 
         tile.draw(this.ctx)
       })
+
+      if(this.state.completed) {
+        this.ctx.font = `${boardDims.size / 30}px Arial`
+        const spentTime = this.state.time.spentTime
+        const congrats = `Hooray! You solved the puzzle in ${utils.secondsToDHMS(spentTime)} and ${this.state.count} moves!`
+        const width = this.ctx.measureText(congrats).width + boardDims.size / 20
+        const height = boardDims.size / 10
+        const x = boardDims.x + (boardDims.size / 2)
+        const y = boardDims.y + (boardDims.size / 2)
+        this.ctx.fillStyle = 'white'
+        this.ctx.fillRect(x - (width / 2), y - (height / 2), width, height)
+        this.ctx.fillStyle = 'black'
+        this.ctx.fillText(congrats, x, y)
+      }
     })
   }
 }

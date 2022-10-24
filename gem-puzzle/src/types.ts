@@ -34,6 +34,7 @@ export type PuzzleState = {
   unoccupiedPosition: Position
   sound: boolean
   music: boolean
+  completed: boolean
 }
 
 export type LocalStorageState = {
@@ -45,4 +46,5 @@ export type LocalStorageState = {
   unoccupiedPosition: Position
   sound: boolean
   music: boolean
+  completed: boolean
 }

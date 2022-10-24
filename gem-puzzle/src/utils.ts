@@ -74,3 +74,12 @@ export function shuffle<T>(data: T[]) {
   }
   return arr
 }
+
+const pad = (value: number) =>  ('0' + Math.floor(value)).slice(-2)
+export function secondsToDHMS(sec: number) {
+  const seconds = pad((sec / 1000) % 60)
+  const minutes = pad((sec / (60 * 1000)) % 60)
+  const hours = pad((sec / (60 * 60 * 1000)) % 24)
+  const days = pad(sec / (24 * 60 * 60 * 1000))
+  return `${days}:${hours}:${minutes}:${seconds}`
+}

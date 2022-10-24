@@ -19,5 +19,6 @@ export const LocalStorageState: Struct<I.LocalStorageState> = object({
   tiles: array(Tile),
   unoccupiedPosition: object({ x: number(), y: number() }),
   sound: boolean(),
-  music: boolean()
+  music: boolean(),
+  completed: boolean()
 })

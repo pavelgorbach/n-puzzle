@@ -48,3 +48,8 @@ export type LocalStorageState = {
   music: boolean
   completed: boolean
 }
+
+export type TopResult = {
+  moves: number
+  spentTime: number
+}

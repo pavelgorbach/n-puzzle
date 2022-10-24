@@ -50,11 +50,11 @@ export default class Puzzle {
   private resetButtonEl: HTMLButtonElement
   private startButtonEl: HTMLButtonElement
   private saveButtonEl: HTMLButtonElement
+  private resultsButtonEl: HTMLButtonElement
   private soundButtonEl: HTMLButtonElement
   private musicButtonEl: HTMLButtonElement
   private soundIconEl: HTMLImageElement
   private musicIconEl: HTMLImageElement
-  private resultsEl: HTMLElement
 
   private ctx: CanvasRenderingContext2D
   private canvasDims: I.CanvasDims
@@ -64,6 +64,8 @@ export default class Puzzle {
   private tileTickFx: HTMLAudioElement
   private buttonPressFx: HTMLAudioElement
   private cheeringFx: HTMLAudioElement
+
+  private showResults: boolean
 
   constructor(rootEl: HTMLElement, initialState = INITIAL_STATE, options: Options = DEFAULT_OPTIONS) {
     this.options = options
@@ -114,9 +116,9 @@ export default class Puzzle {
     this.saveButtonEl.classList.add('button')
     this.saveButtonEl.innerText = 'Save'
 
-    const resultsButton = document.createElement('button')
-    resultsButton.classList.add('button')
-    resultsButton.innerText = 'Results'
+    this.resultsButtonEl = document.createElement('button')
+    this.resultsButtonEl.classList.add('button')
+    this.resultsButtonEl.innerText = 'Results'
 
     this.resetBoardFx = new Audio(require('./assets/fx/shuffle.mp3').default) 
     this.tileTickFx = new Audio(require('./assets/fx/hit.wav').default) 
@@ -138,11 +140,8 @@ export default class Puzzle {
       this.indicatorEl,
       this.startButtonEl,
       this.saveButtonEl,
-      resultsButton
+      this.resultsButtonEl
     )
-
-    this.resultsEl = document.createElement('div')
-    this.resultsEl.classList.add('results')
 
     this.canvasEl = document.createElement('canvas')
     this.canvasEl.classList.add('canvas')
@@ -193,6 +192,7 @@ export default class Puzzle {
       this.startButtonEl.disabled = false
       this.saveButtonEl.disabled = false
     }
+    if(this.showResults) this.showResults = false
 
     GameProgressLocalStorage.clearState()
 
@@ -227,12 +227,14 @@ export default class Puzzle {
     this.state.paused = false
     this.startButtonEl.innerText = 'Pause'
     this.indicatorEl.classList.remove('paused')
+    if(this.showResults) this.showResults = false
 
     if(this.state.music) {
       this.backgroundFx.play()
     }
 
     this.state.time.start()
+    this.render()
   }
 
   private pause() {
@@ -303,7 +305,7 @@ export default class Puzzle {
     this.cheeringFx.play()
     this.state.completed = true
 
-    let results = [{ moves: this.state.count, spentTime: this.state.time.spentTime }]
+    let results: I.TopResult[] = [{ moves: this.state.count, spentTime: this.state.time.spentTime }]
     const resultsLocalStorage = window.localStorage.getItem('RESULTS')
 
     if(resultsLocalStorage) {
@@ -351,6 +353,8 @@ export default class Puzzle {
         this.start()
         return
       }
+
+      if(this.showResults) this.showResults = false
 
       const cursorPosition = { x: e.offsetX, y: e.offsetY }
       const tileMatch = this.findTileByPosition(cursorPosition)
@@ -417,10 +421,13 @@ export default class Puzzle {
       this.toggleMusic()
     })
 
+    this.resultsButtonEl.addEventListener('click', () => {
+      this.showResults = !this.showResults 
+      this.render()
+    })
+
     window.addEventListener('beforeunload', (e) => {
-      // this.pause()
-      // e.preventDefault()
-      // e.returnValue = ''
+      //TODO: show Warning message
     })
     
   }
@@ -445,7 +452,7 @@ export default class Puzzle {
   }
 
   private mount() {
-    this.rootEl.append(this.displayEl, this.canvasEl, this.controlsEl, this.resultsEl)
+    this.rootEl.append(this.displayEl, this.canvasEl, this.controlsEl)
 
     this.canvasDims = utils.getCanvasDimensions(this.canvasEl)
     this.canvasEl.width = this.canvasDims.pxWidth
@@ -503,6 +510,26 @@ export default class Puzzle {
         this.ctx.fillRect(x - (width / 2), y - (height / 2), width, height)
         this.ctx.fillStyle = 'black'
         this.ctx.fillText(congrats, x, y)
+      }
+
+      if(this.showResults) {
+        const localStorageResults = window.localStorage.getItem('RESULTS')
+        if(!localStorageResults) return
+
+        const results: I.TopResult[] = JSON.parse(localStorageResults)
+        this.ctx.font = `${boardDims.size / 30}px Arial`
+
+        results.forEach((item, idx) => {
+          const itemText = `${idx + 1}. time: ${utils.secondsToDHMS(item.spentTime)}, moves: ${item.moves}` 
+          const width = this.ctx.measureText(itemText).width + boardDims.size / 20
+          const height = boardDims.size / 10
+          const x = boardDims.x + (boardDims.size / 2)
+          const y = boardDims.y + (boardDims.size / results.length) + (idx * (height / 1.1))
+          this.ctx.fillStyle = 'white'
+          this.ctx.fillRect(x - (width / 2), y - (height / 2), width, height)
+          this.ctx.fillStyle = 'black'
+          this.ctx.fillText(itemText, x, y)
+        })
       }
     })
   }

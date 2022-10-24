@@ -121,7 +121,7 @@ export default class Puzzle {
     this.resultsButtonEl.innerText = 'Results'
 
     this.resetBoardFx = new Audio(require('./assets/fx/shuffle.mp3').default) 
-    this.tileTickFx = new Audio(require('./assets/fx/hit.wav').default) 
+    this.tileTickFx = new Audio(require('./assets/fx/hit.mp3').default) 
     this.backgroundFx = new Audio(require('./assets/fx/serenity.mp3').default)
     this.backgroundFx.loop = true 
     this.buttonPressFx = new Audio(require('./assets/fx/button-press.mp3').default) 

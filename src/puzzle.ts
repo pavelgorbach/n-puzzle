@@ -366,55 +366,56 @@ export default class Puzzle {
       if(tileMovable) {
         const newPositionOnBoard = this.state.unoccupiedPosition
         this.state.unoccupiedPosition = tileMatch.positionOnBoard
+        tileMatch.positionOnBoard = newPositionOnBoard
 
         //TODO: refactor
-        if(newPositionOnBoard.x > tileMatch.positionOnBoard.x) {
-          for(let i = 0; i < 10; i++) {
-            setTimeout(() => {
-              tileMatch.positionOnBoard = {
-                x: +(tileMatch.positionOnBoard.x + .1).toFixed(1),
-                y: tileMatch.positionOnBoard.y
-              }
-              this.render()
-            }, i * 10)
-          }
-        }
+        // if(newPositionOnBoard.x > tileMatch.positionOnBoard.x) {
+        //   for(let i = 0; i < 10; i++) {
+        //     setTimeout(() => {
+        //       tileMatch.positionOnBoard = {
+        //         x: +(tileMatch.positionOnBoard.x + .1).toFixed(1),
+        //         y: tileMatch.positionOnBoard.y
+        //       }
+        //       this.render()
+        //     }, i * 10)
+        //   }
+        // }
 
-        if(newPositionOnBoard.x < tileMatch.positionOnBoard.x) {
-          for(let i = 0; i < 10; i++) {
-            setTimeout(() => {
-              tileMatch.positionOnBoard = {
-                x: +(tileMatch.positionOnBoard.x - .1).toFixed(1),
-                y: tileMatch.positionOnBoard.y
-              }
-              this.render()
-            }, i * 10)
-          }
-        }
+        // if(newPositionOnBoard.x < tileMatch.positionOnBoard.x) {
+        //   for(let i = 0; i < 10; i++) {
+        //     setTimeout(() => {
+        //       tileMatch.positionOnBoard = {
+        //         x: +(tileMatch.positionOnBoard.x - .1).toFixed(1),
+        //         y: tileMatch.positionOnBoard.y
+        //       }
+        //       this.render()
+        //     }, i * 10)
+        //   }
+        // }
 
-        if(newPositionOnBoard.y > tileMatch.positionOnBoard.y) {
-          for(let i = 0; i < 10; i++) {
-            setTimeout(() => {
-              tileMatch.positionOnBoard = {
-                x: tileMatch.positionOnBoard.x,
-                y: +(tileMatch.positionOnBoard.y + .1).toFixed(1),
-              }
-              this.render()
-            }, i * 10)
-          }
-        }
+        // if(newPositionOnBoard.y > tileMatch.positionOnBoard.y) {
+        //   for(let i = 0; i < 10; i++) {
+        //     setTimeout(() => {
+        //       tileMatch.positionOnBoard = {
+        //         x: tileMatch.positionOnBoard.x,
+        //         y: +(tileMatch.positionOnBoard.y + .1).toFixed(1),
+        //       }
+        //       this.render()
+        //     }, i * 10)
+        //   }
+        // }
 
-        if(newPositionOnBoard.y < tileMatch.positionOnBoard.y) {
-          for(let i = 0; i < 10; i++) {
-            setTimeout(() => {
-              tileMatch.positionOnBoard = {
-                x: tileMatch.positionOnBoard.x,
-                y: +(tileMatch.positionOnBoard.y - .1).toFixed(1),
-              }
-              this.render()
-            }, i * 10)
-          }
-        }
+        // if(newPositionOnBoard.y < tileMatch.positionOnBoard.y) {
+        //   for(let i = 0; i < 10; i++) {
+        //     setTimeout(() => {
+        //       tileMatch.positionOnBoard = {
+        //         x: tileMatch.positionOnBoard.x,
+        //         y: +(tileMatch.positionOnBoard.y - .1).toFixed(1),
+        //       }
+        //       this.render()
+        //     }, i * 10)
+        //   }
+        // }
        
         this.state.count++
         this.counterEl.innerText = `${this.state.count}`
@@ -429,7 +430,7 @@ export default class Puzzle {
           this.complete()
         }
 
-        // this.render()
+        this.render()
       }
     })
 

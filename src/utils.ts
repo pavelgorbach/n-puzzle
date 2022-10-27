@@ -77,7 +77,7 @@ export function generateTiles(matrix: number): I.TileDTO[] {
     })
   })
 
-  console.log('SOLVABLE', tiles)
+  console.log('SOLVABLE')
   return tiles
 }
 

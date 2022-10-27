@@ -49,7 +49,7 @@ export default class TileComponent {
     ctx.fillRect(this.position.x, this.position.y, this.size, this.size)
 
     ctx.fillStyle = 'black'
-    ctx.fillText(`${Number(this.id) + 1}`, this.position.x + (this.size / 2), this.position.y + (this.size / 2))
+    ctx.fillText(this.id, this.position.x + (this.size / 2), this.position.y + (this.size / 2))
 
     ctx.strokeStyle = this.strokeColor
     ctx.strokeRect(this.position.x, this.position.y, this.size, this.size)

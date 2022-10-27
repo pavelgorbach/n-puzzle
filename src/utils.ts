@@ -1,3 +1,4 @@
+import TileComponent from 'tile'
 import * as I from './types'
 
 /** Return the CSS dimensions, dpr (device pixel resolution), and desired pixel dimensions, of a canvas. */
@@ -41,26 +42,42 @@ export function isTileNextToUnoccupied(tile: I.Position, unoccupied: I.Position)
   )
 }
 
-export function generateTiles(matrix: number): I.TileDTO[] {
-  const length = Math.pow(matrix, 2) - 1
-  const ids = Array.from({ length }, (_, idx) => idx.toString())
-  const shuffledIds = shuffle(ids)
-  
-  const tiles: I.TileDTO[] = []
+function to2dArray(data: number[], matrix: number) {
+  let result: number[][] = Array.from({ length: matrix }, () => []) 
 
   let idx = 0
-
   for(let i = 0; i < matrix; i++) {
     for(let j = 0; j < matrix; j++) {
-      if(shuffledIds[idx]) {
-        tiles.push({
-          id: shuffledIds[idx] as I.TileId,
-          positionOnBoard: { x: j, y: i },
-        })
-      }
-      idx += 1
+      result[i][j] = data[idx]
+      idx++
     }
   }
+
+  return result
+}
+
+export function generateTiles(matrix: number): I.TileDTO[] {
+  const length = Math.pow(matrix, 2)
+  const ids = Array.from({ length }, (_, idx) => idx)
+  const shuffledIds = shuffle(ids)
+  const tileMatrix = to2dArray(shuffledIds, matrix)
+
+  if(!isPuzzleSolvable(tileMatrix)) {
+    console.log('NOT SOLVABLE, regenerate is in progress..')
+    return generateTiles(matrix)
+  }
+  
+  console.log('SOLVABLE')
+  const tiles: I.TileDTO[] = []
+
+  tileMatrix.forEach((row, x) => {
+    row.forEach((id, y) => {
+      tiles.push({
+        id: id.toString() as I.TileId,
+        positionOnBoard: { x, y },
+      })
+    })
+  })
 
   return tiles
 }
@@ -82,4 +99,23 @@ export function secondsToDHMS(sec: number) {
   const hours = pad((sec / (60 * 60 * 1000)) % 24)
   const days = pad(sec / (24 * 60 * 60 * 1000))
   return `${days}:${hours}:${minutes}:${seconds}`
+}
+
+function isPuzzleSolvable(puzzle: number[][]) {
+  let invCount = getInvCount(puzzle)
+  return (invCount % 2 == 0)
+}
+
+function getInvCount(arr: number[][]) {
+  let inv_count = 0
+
+  for(let i = 0; i < arr.length - 1; i++) {
+    for(let j = i + 1; j < arr.length; j++) {
+      if (arr[j][i] > 0 && arr[j][i] > arr[i][j]) {
+        inv_count += 1
+      }
+    }
+  }
+
+  return inv_count
 }

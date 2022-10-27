@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "description": "My webpack project",
-  "name": "my-webpack-project",
+  "description": "Gem Puzzle",
+  "name": "gem-puzzle",
   "license": "MIT",
   "scripts": {
     "build": "webpack --mode=production --node-env=production",

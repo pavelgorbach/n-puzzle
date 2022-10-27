@@ -30,7 +30,7 @@ const INITIAL_STATE: I.LocalStorageState = {
   paused: true,
   tiles: [],
   tileMatrix: 4, 
-  unoccupiedPosition: { x: 3, y: 3 },
+  unoccupiedPosition: null,
   sound: true,
   music: true,
   completed: false
@@ -157,6 +157,7 @@ export default class Puzzle {
     let initialTiles = initialState.tiles
 
     if(initialTiles.length === 0) {
+      console.log('REGENERATE TILES')
       initialTiles = utils.generateTiles(initialState.tileMatrix)
     }
 
@@ -172,9 +173,11 @@ export default class Puzzle {
       )
     })
 
-    const time = new TimerComponent(this.timerEl, initialState.time)
+    const unoccupiedPosition = initialState.unoccupiedPosition || tiles.get('0' as I.TileId).positionOnBoard
 
-    this.state = { ...initialState, tiles, time }
+    const time = new TimerComponent(this.timerEl, initialState.time)
+    
+    this.state = { ...initialState, unoccupiedPosition, tiles, time }
 
     this.canvasEl.style.cursor = 'pointer'
     this.canvasEl.oncontextmenu = () => false
@@ -183,7 +186,6 @@ export default class Puzzle {
   }
 
   private reset() {
-    this.pause()
     if(this.state.sound) this.resetBoardFx.play()
     if(this.state.music) this.backgroundFx.currentTime = 0
     if(this.state.completed) {
@@ -193,8 +195,6 @@ export default class Puzzle {
       this.saveButtonEl.disabled = false
     }
     if(this.showResults) this.showResults = false
-
-    GameProgressLocalStorage.clearState()
 
     const tiles: Map<I.TileId, TileComponent> = new Map()
     const generatedTiles = utils.generateTiles(this.state.tileMatrix)
@@ -214,10 +214,8 @@ export default class Puzzle {
     this.state.tiles = tiles
     this.state.count = 0
     this.state.time.reset()
-    this.state.unoccupiedPosition = {
-      x: this.state.tileMatrix - 1,
-      y: this.state.tileMatrix - 1
-    }
+    this.state.unoccupiedPosition = tiles.get('0' as I.TileId).positionOnBoard
+
     this.counterEl.innerText = `${this.state.count}`
 
     this.render()
@@ -489,6 +487,8 @@ export default class Puzzle {
     for (let i = tiles.length - 1; i >= 0; i--) {
       const tile = tiles[i]
 
+      if(tile.id === '0') continue 
+
       const isClickWithinTileArea = utils.getIsPointWithinTileArea({
         point: { ...p },
         tile: { x: tile.position.x, y: tile.position.y, size: tile.size },
@@ -538,6 +538,8 @@ export default class Puzzle {
       this.ctx.fillRect(boardDims.x, boardDims.y, boardDims.size, boardDims.size)
 
       this.state.tiles.forEach((tile) => {
+        if(tile.id === '0') return
+
         const tileSize = boardDims.size / this.state.tileMatrix
 
         tile.updateDimensions({

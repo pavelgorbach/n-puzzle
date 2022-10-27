@@ -298,7 +298,12 @@ export default class Puzzle {
     this.cheeringFx.play()
     this.state.completed = true
 
-    let results: I.TopResult[] = [{ moves: this.state.count, spentTime: this.state.time.spentTime }]
+    let results: I.TopResult[] = [{
+      moves: this.state.count,
+      spentTime: this.state.time.spentTime,
+      matrix: this.state.tileMatrix 
+    }]
+
     const resultsLocalStorage = window.localStorage.getItem('RESULTS')
 
     if(resultsLocalStorage) {
@@ -577,7 +582,7 @@ export default class Puzzle {
         this.ctx.font = `${boardDims.size / 30}px Arial`
 
         results.forEach((item, idx) => {
-          const itemText = `${idx + 1}. time: ${utils.secondsToDHMS(item.spentTime)}, moves: ${item.moves}` 
+          const itemText = `${idx + 1} | ${utils.secondsToDHMS(item.spentTime)} | ${item.moves} | ${item.matrix}x${item.matrix}` 
           const width = this.ctx.measureText(itemText).width + boardDims.size / 20
           const height = boardDims.size / 10
           const x = boardDims.x + (boardDims.size / 2)

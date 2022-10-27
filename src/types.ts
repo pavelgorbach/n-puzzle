@@ -50,4 +50,5 @@ export type LocalStorageState = {
 export type TopResult = {
   moves: number
   spentTime: number
+  matrix: number
 }

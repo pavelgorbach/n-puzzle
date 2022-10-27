@@ -66,12 +66,10 @@ export function generateTiles(matrix: number): I.TileDTO[] {
     console.log('NOT SOLVABLE, regenerate is in progress..')
     return generateTiles(matrix)
   }
-  
-  console.log('SOLVABLE')
+ 
   const tiles: I.TileDTO[] = []
-
-  tileMatrix.forEach((row, x) => {
-    row.forEach((id, y) => {
+  tileMatrix.forEach((row, y) => {
+    row.forEach((id, x) => {
       tiles.push({
         id: id.toString() as I.TileId,
         positionOnBoard: { x, y },
@@ -79,6 +77,7 @@ export function generateTiles(matrix: number): I.TileDTO[] {
     })
   })
 
+  console.log('SOLVABLE', tiles)
   return tiles
 }
 

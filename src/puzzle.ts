@@ -30,7 +30,6 @@ const INITIAL_STATE: I.LocalStorageState = {
   paused: true,
   tiles: [],
   tileMatrix: 4, 
-  unoccupiedPosition: null,
   sound: true,
   music: true,
   completed: false
@@ -157,7 +156,6 @@ export default class Puzzle {
     let initialTiles = initialState.tiles
 
     if(initialTiles.length === 0) {
-      console.log('REGENERATE TILES')
       initialTiles = utils.generateTiles(initialState.tileMatrix)
     }
 
@@ -173,11 +171,9 @@ export default class Puzzle {
       )
     })
 
-    const unoccupiedPosition = initialState.unoccupiedPosition || tiles.get('0' as I.TileId).positionOnBoard
-
     const time = new TimerComponent(this.timerEl, initialState.time)
     
-    this.state = { ...initialState, unoccupiedPosition, tiles, time }
+    this.state = { ...initialState, tiles, time }
 
     this.canvasEl.style.cursor = 'pointer'
     this.canvasEl.oncontextmenu = () => false
@@ -214,7 +210,6 @@ export default class Puzzle {
     this.state.tiles = tiles
     this.state.count = 0
     this.state.time.reset()
-    this.state.unoccupiedPosition = tiles.get('0' as I.TileId).positionOnBoard
 
     this.counterEl.innerText = `${this.state.count}`
 
@@ -324,7 +319,7 @@ export default class Puzzle {
   }
 
   private isCompleted() {
-    let idx = 0
+    let idx = 1
 
     loop:
     for(let i = 0; i < this.state.tileMatrix; i++) {
@@ -339,6 +334,16 @@ export default class Puzzle {
     }
 
     return idx === this.state.tiles.size
+  }
+
+  private getUnoccupied() {
+    return this.state.tiles.get('0' as I.TileId)
+  }
+
+  private swipeTilePositionsOnBoard(a: TileComponent, b: TileComponent) {
+    const newPositionOnBoard = { x: a.positionOnBoard.x, y: a.positionOnBoard.y }
+    a.positionOnBoard = b.positionOnBoard
+    b.positionOnBoard = newPositionOnBoard
   }
 
   private addEventListeners() {
@@ -359,12 +364,11 @@ export default class Puzzle {
 
       if(tileMatch === null) return
 
-      const tileMovable = utils.isTileNextToUnoccupied(tileMatch.positionOnBoard, this.state.unoccupiedPosition)
+      const unoccupied = this.getUnoccupied()
+      const tileMovable = utils.isTileNextToUnoccupied(tileMatch.positionOnBoard, unoccupied.positionOnBoard)
 
       if(tileMovable) {
-        const newPositionOnBoard = this.state.unoccupiedPosition
-        this.state.unoccupiedPosition = tileMatch.positionOnBoard
-        tileMatch.positionOnBoard = newPositionOnBoard
+        this.swipeTilePositionsOnBoard(unoccupied, tileMatch)
 
         //TODO: refactor
         // if(newPositionOnBoard.x > tileMatch.positionOnBoard.x) {

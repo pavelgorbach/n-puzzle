@@ -41,7 +41,6 @@ export default abstract class GameProgressLocalStorage {
       paused: true,
       time,
       count: state.count,
-      unoccupiedPosition: state.unoccupiedPosition,
       sound: state.sound,
       music: state.music,
       completed: false

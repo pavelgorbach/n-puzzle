@@ -31,7 +31,6 @@ export type PuzzleState = {
   time: Timer 
   paused: boolean
   tiles: Map<TileId, TileComponent>
-  unoccupiedPosition: Position
   sound: boolean
   music: boolean
   completed: boolean
@@ -43,7 +42,6 @@ export type LocalStorageState = {
   time: number 
   paused: boolean
   tiles: TileDTO[]
-  unoccupiedPosition: Position
   sound: boolean
   music: boolean
   completed: boolean

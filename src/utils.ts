@@ -13,7 +13,7 @@ export function getCanvasDimensions(canvas: HTMLCanvasElement | HTMLElement) {
 
 export function getBoardDimensions(p: {
   canvasSize: { width: number, height: number },
-  tileMatrix: I.TileMatrix
+  tileMatrix: number 
 }) {
   const min = Math.min(p.canvasSize.width, p.canvasSize.height)
   const tileSize = min / p.tileMatrix - ((min / p.tileMatrix / 4)) 
@@ -42,18 +42,22 @@ export function isTileNextToUnoccupied(tile: I.Position, unoccupied: I.Position)
   )
 }
 
-function to2dArray(data: number[], matrix: number) {
-  let result: number[][] = Array.from({ length: matrix }, () => []) 
+export function isCompleted(p: { tileMatrix: number , tiles: Map<I.TileId, TileComponent> }) {
+  let idx = 1
 
-  let idx = 0
-  for(let i = 0; i < matrix; i++) {
-    for(let j = 0; j < matrix; j++) {
-      result[i][j] = data[idx]
-      idx++
+  loop:
+  for(let y = 0; y < p.tileMatrix; y++) {
+    for(let x = 0; x < p.tileMatrix; x++) {
+      const tile = p.tiles.get(`${idx}` as I.TileId)
+      if(tile && tile.id === `${idx}` && tile.positionOnBoard.x === x && tile.positionOnBoard.y === y) {
+        idx++
+      } else {
+        break loop
+      }
     }
   }
 
-  return result
+  return idx === p.tiles.size
 }
 
 export function generateTiles(matrix: number): I.TileDTO[] {
@@ -81,6 +85,20 @@ export function generateTiles(matrix: number): I.TileDTO[] {
   return tiles
 }
 
+function to2dArray(data: number[], matrix: number) {
+  let result: number[][] = Array.from({ length: matrix }, () => []) 
+
+  let idx = 0
+  for(let i = 0; i < matrix; i++) {
+    for(let j = 0; j < matrix; j++) {
+      result[i][j] = data[idx]
+      idx++
+    }
+  }
+
+  return result
+}
+
 export function shuffle<T>(data: T[]) {
   const arr = [...data]
 
@@ -92,6 +110,7 @@ export function shuffle<T>(data: T[]) {
 }
 
 const pad = (value: number) =>  ('0' + Math.floor(value)).slice(-2)
+
 export function secondsToDHMS(sec: number) {
   const seconds = pad((sec / 1000) % 60)
   const minutes = pad((sec / (60 * 1000)) % 60)

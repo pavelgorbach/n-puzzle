@@ -15,8 +15,6 @@ export type TileDTO = {
   positionOnBoard: Position
 }
 
-export type TileMatrix = 3 | 4 | 5 | 6 | 7 | 8
-
 export type CanvasDims = {
   cssWidth: number
   cssHeight: number
@@ -26,25 +24,23 @@ export type CanvasDims = {
 }
 
 export type PuzzleState = {
-  tileMatrix: TileMatrix 
+  tileMatrix: number 
   count: number
   time: Timer 
   paused: boolean
   tiles: Map<TileId, TileComponent>
   sound: boolean
   music: boolean
-  completed: boolean
 }
 
 export type LocalStorageState = {
-  tileMatrix: TileMatrix 
+  tileMatrix: number 
   count: number
   time: number 
   paused: boolean
   tiles: TileDTO[]
   sound: boolean
   music: boolean
-  completed: boolean
 }
 
 export type TopResult = {

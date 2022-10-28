@@ -1,3 +1,11 @@
+table {
+  text-align: center;
+}
+
+th, td {
+  padding: 2px;
+}
+
 #root {
   position: fixed;
   left: 50%;
@@ -9,6 +17,36 @@
   max-width: 2800px;
   max-height: 2800px;
   min-width: 320px;
+}
+
+.popup-overlay {
+  position: fixed;
+  z-index: 9;
+  display: none;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, .5);
+}
+
+.popup-overlay.visible {
+  display: block;
+}
+
+.popup {
+  display: flex;
+  position: absolute;
+  z-index: 9;
+  min-width: 300px;
+  min-height: 200px;
+  background: white;
+  padding: 20px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  align-items: center;
+  justify-content: center;
 }
 
 .display {
